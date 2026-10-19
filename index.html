@@ -1,0 +1,2445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="毛春积分" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>毛春家庭新政 · 积分制管理系统</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .day-pill-active {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.28);
+    }
+    .chun-badge {
+      background-color: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #c7d2fe;
+    }
+    .mao-badge {
+      background-color: #fdf2f8;
+      color: #be185d;
+      border: 1px solid #fbcfe8;
+    }
+    .steal-badge {
+      background-color: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Top Header & Core Anchor Banner -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-rose-500 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+          🌟
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">毛春家庭新政 · 积分制管理法典</h1>
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">1 积分 = 1 元 RMB</span>
+          </div>
+          <p class="text-xs text-slate-500 hidden sm:block">无条件自信 · 松弛安全感 · 眼里有活主动出击 · 双盲交叉审核</p>
+        </div>
+      </div>
+
+      <!-- Main Navigation Tabs -->
+      <nav class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+        <button id="nav-daily" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-indigo-600 shadow-sm">
+          📋 每日项目列选打卡
+        </button>
+        <button id="nav-matrix" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
+          📅 30天全景明细表
+        </button>
+        <button id="nav-shop" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
+          🎁 愿望商城与金库
+        </button>
+        <button id="nav-rules" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
+          ⚖️ 制度与数据管理
+        </button>
+        <button id="nav-sync" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs flex items-center gap-1">
+          <span>📲 双手机同步/安装</span>
+          <span id="sync-status-dot" class="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Global Summary Dashboard Bar -->
+  <section class="bg-slate-900 text-white border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- Chunchun Card -->
+        <div class="bg-slate-800/90 border border-indigo-500/30 rounded-xl p-3.5 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-sm">🧑🏻‍💻</span>
+              <div>
+                <span class="text-sm font-bold text-indigo-300">春春 (Chunchun)</span>
+                <span id="chun-audit-badge" class="ml-1.5 text-[11px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">待毛毛签字</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-slate-400">当日得分</div>
+              <div class="text-xl font-extrabold text-indigo-400"><span id="stat-chun-today">0</span> <span class="text-xs font-normal">分</span></div>
+            </div>
+          </div>
+          <div class="mt-2.5">
+            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>今日建议参考线 (50分)</span>
+              <span id="stat-chun-progress-label">0 / 50 分</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+              <div id="stat-chun-bar" class="h-full bg-indigo-500 transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-300 pt-1.5 border-t border-slate-700/80">
+              <span>本月累计: <strong id="stat-chun-month" class="text-white">0</strong>分</span>
+              <span>可用余额: <strong id="stat-chun-avail" class="text-emerald-400">0</strong>分</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Maomao Card -->
+        <div class="bg-slate-800/90 border border-pink-500/30 rounded-xl p-3.5 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-full bg-pink-500/20 border border-pink-400/40 flex items-center justify-center text-sm">👩🏻‍🎨</span>
+              <div>
+                <span class="text-sm font-bold text-pink-300">毛毛 (Maomao)</span>
+                <span id="mao-audit-badge" class="ml-1.5 text-[11px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">待春春签字</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-slate-400">当日得分</div>
+              <div class="text-xl font-extrabold text-pink-400"><span id="stat-mao-today">0</span> <span class="text-xs font-normal">分</span></div>
+            </div>
+          </div>
+          <div class="mt-2.5">
+            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>今日建议参考线 (50分)</span>
+              <span id="stat-mao-progress-label">0 / 50 分</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+              <div id="stat-mao-bar" class="h-full bg-pink-500 transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-300 pt-1.5 border-t border-slate-700/80">
+              <span>本月累计: <strong id="stat-mao-month" class="text-white">0</strong>分</span>
+              <span>可用余额: <strong id="stat-mao-avail" class="text-emerald-400">0</strong>分</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monthly 3000 Fund Pool -->
+        <div class="bg-slate-800/90 border border-amber-500/30 rounded-xl p-3.5 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-amber-300 uppercase tracking-wider">💰 月度 3000 元奖励基金池</span>
+              <div class="text-lg font-bold text-white mt-0.5">全家总产出: <span id="stat-family-month" class="text-amber-400">0</span> 分</div>
+            </div>
+            <div class="text-right">
+              <span class="text-[11px] text-slate-400">本月可兑现额度</span>
+              <div class="text-sm font-bold text-emerald-400"><span id="stat-fund-redeemable">0</span> / 3000 元</div>
+            </div>
+          </div>
+          <div class="mt-2">
+            <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+              <div id="stat-fund-bar" class="h-full bg-amber-400 transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="mt-2 flex items-center justify-between text-xs text-slate-300 pt-1.5 border-t border-slate-700/80">
+              <span>已消费核销: <strong id="stat-spent-month" class="text-rose-400">0</strong>分</span>
+              <span>🏦 家庭央行储备: <strong id="stat-central-bank" class="text-amber-300">0</strong>分</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Today Quick Audit & Steal Summary -->
+        <div class="bg-slate-800/90 border border-emerald-500/30 rounded-xl p-3.5 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-emerald-300">⚖️ 双盲交叉审核 & 截胡统计</span>
+              <div id="stat-selected-date-title" class="text-sm font-bold text-white mt-0.5">第 1 天</div>
+            </div>
+            <span id="stat-steal-count" class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
+              🚀 今日截胡/代劳 0 次
+            </span>
+          </div>
+          <div class="mt-2 grid grid-cols-2 gap-2 pt-1">
+            <button id="btn-audit-mao" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1 bg-slate-700/80 hover:bg-indigo-600/80 text-slate-200 border-slate-600">
+              <span>✍️ 春春签字审毛毛</span>
+            </button>
+            <button id="btn-audit-chun" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1 bg-slate-700/80 hover:bg-pink-600/80 text-slate-200 border-slate-600">
+              <span>✍️ 毛毛签字审春春</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 30-Day Horizontal Day Selector Strip -->
+  <section class="bg-white border-b border-slate-200 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5">
+      <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
+        <div class="flex items-center gap-2">
+          <label for="month-selector" class="text-xs font-bold text-slate-700">📅 考核月份:</label>
+          <select id="month-selector" class="text-xs font-semibold bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="2026-10">2026年10月 (30天考核周期)</option>
+            <option value="2026-11">2026年11月 (30天考核周期)</option>
+            <option value="2026-12">2026年12月 (30天考核周期)</option>
+          </select>
+          <span id="current-day-weekday-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+            第 20 天 · 星期二
+          </span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-slate-500">
+          <span>💡 点击任意日期可切换查看或补录当天项目；蓝字为春春得分，粉字为毛毛得分</span>
+        </div>
+      </div>
+
+      <!-- 30 Days Scrollable Strip -->
+      <div id="day-strip-container" class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1.5">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex-1 w-full">
+
+    <!-- VIEW 1: DAILY CHECKLIST & ALL PROJECTS SELECTION -->
+    <div id="view-daily" class="space-y-5">
+      <!-- Filter & Control Toolbar -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <!-- Category Filter Pills -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button type="button" data-cat="all" class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-xs transition-all">
+              📚 全部项目列选 (75项)
+            </button>
+            <button type="button" data-cat="pet" class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all">
+              🧹 1. 宠物主子伺候 (17)
+            </button>
+            <button type="button" data-cat="chore" class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all">
+              🏠 2. 日常家务与起居 (42)
+            </button>
+            <button type="button" data-cat="growth" class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all">
+              📖 3. 个人提升与行政 (13)
+            </button>
+            <button type="button" data-cat="spirit" class="cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all">
+              🧘‍♀️ 4. 情绪价值与修行 (16)
+            </button>
+          </div>
+
+          <!-- Right Filters: Schedule Filter, Role Filter, Search -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <select id="filter-schedule" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="all">📅 显示全部75个项目 (全列选模式)</option>
+              <option value="recommended">⭐ 仅看今日应做/推荐项目 (按星期自动匹配)</option>
+              <option value="done">✅ 仅看今日已得分项目</option>
+              <option value="todo">⭕ 仅看今日未完成项目</option>
+            </select>
+
+            <select id="filter-owner" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="all">👥 全部角色分工</option>
+              <option value="chun">🧑🏻‍💻 春春负责 / 牵头</option>
+              <option value="mao">👩🏻‍🎨 毛毛负责 / 牵头 / 专属</option>
+              <option value="both">🤝 双方各自负责 / 共同遵守</option>
+            </select>
+
+            <div class="relative">
+              <input id="search-input" type="text" placeholder="搜索项目名称，如：口吐莲花、洗碗..." class="text-xs bg-slate-50 border border-slate-300 rounded-lg pl-3 pr-7 py-1.5 w-48 sm:w-56 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <button id="clear-search-btn" type="button" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend for the 4 Special Scoring Mechanisms -->
+        <div class="pt-2.5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
+          <div class="flex items-center gap-2 bg-indigo-50/70 border border-indigo-100 rounded-lg px-2.5 py-1.5 text-indigo-900">
+            <span class="text-base">🔢</span>
+            <div><strong>高频计次项目</strong>：如“口吐莲花”，每完成1次点一下 <code>+1次</code> 实时累加。</div>
+          </div>
+          <div class="flex items-center gap-2 bg-pink-50/70 border border-pink-100 rounded-lg px-2.5 py-1.5 text-pink-900">
+            <span class="text-base">⏱️</span>
+            <div><strong>按时长分段积分</strong>：如“毛毛学习新领域(5分/2h)”，每满2h点一次，6h点3次积15分。</div>
+          </div>
+          <div class="flex items-center gap-2 bg-emerald-50/70 border border-emerald-100 rounded-lg px-2.5 py-1.5 text-emerald-900">
+            <span class="text-base">👥</span>
+            <div><strong>各自负责双轨</strong>：如“早中晚饭/念佛经”，春春和毛毛各有独立打勾/计次按钮，各积各分。</div>
+          </div>
+          <div class="flex items-center gap-2 bg-amber-50/70 border border-amber-100 rounded-lg px-2.5 py-1.5 text-amber-900">
+            <span class="text-base">🚀</span>
+            <div><strong>截胡/代劳抢分</strong>：专属或牵头项目旁设“🚀截胡/代劳”按钮，一键将全额积分划归主动执行方。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Two-Column Workspace: All Tasks List + Today's Live Breakdown -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+        <!-- Left 2 Columns: All Tasks List Grouped by Category -->
+        <div id="tasks-list-container" class="lg:col-span-2 space-y-5">
+          <!-- Populated dynamically by JS -->
+        </div>
+
+        <!-- Right 1 Column: Sticky Daily Scorecard & Audit Log -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs lg:sticky lg:top-20 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                <span>📊</span>
+                <span id="sidebar-day-title">第 20 天 · 实时积分成绩单</span>
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">清晰看到今天谁做了什么、谁截了胡、什么还没做</p>
+            </div>
+            <button id="btn-reset-today" type="button" class="text-xs text-rose-600 hover:text-rose-700 font-medium px-2 py-1 rounded hover:bg-rose-50 transition-colors">
+              清空当日
+            </button>
+          </div>
+
+          <!-- Dual Score Summary Pill -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="rounded-xl p-3 bg-indigo-50/80 border border-indigo-200">
+              <div class="text-xs font-semibold text-indigo-700 flex items-center justify-between">
+                <span>🧑🏻‍💻 春春今日得分</span>
+                <span id="sidebar-chun-count" class="text-[11px] bg-indigo-100 px-1.5 py-0.5 rounded">0项</span>
+              </div>
+              <div class="text-2xl font-extrabold text-indigo-700 mt-1"><span id="sidebar-chun-pts">0</span> <span class="text-xs font-normal">分</span></div>
+            </div>
+            <div class="rounded-xl p-3 bg-pink-50/80 border border-pink-200">
+              <div class="text-xs font-semibold text-pink-700 flex items-center justify-between">
+                <span>👩🏻‍🎨 毛毛今日得分</span>
+                <span id="sidebar-mao-count" class="text-[11px] bg-pink-100 px-1.5 py-0.5 rounded">0项</span>
+              </div>
+              <div class="text-2xl font-extrabold text-pink-700 mt-1"><span id="sidebar-mao-pts">0</span> <span class="text-xs font-normal">分</span></div>
+            </div>
+          </div>
+
+          <!-- Tabs inside Sidebar: Done vs Todo Recommended -->
+          <div class="flex border-b border-slate-200 text-xs font-semibold">
+            <button id="side-tab-done" type="button" class="flex-1 py-2 text-center border-b-2 border-indigo-600 text-indigo-600">
+              ✅ 今日已做明细 (<span id="side-done-num">0</span>)
+            </button>
+            <button id="side-tab-todo" type="button" class="flex-1 py-2 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800">
+              ⏳ 今日应做未做 (<span id="side-todo-num">0</span>)
+            </button>
+          </div>
+
+          <!-- Done Items List -->
+          <div id="sidebar-done-list" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-1">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Todo Recommended Items List -->
+          <div id="sidebar-todo-list" class="hidden space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-1">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Quick Add Custom Task Modal Trigger -->
+          <div class="pt-3 border-t border-slate-100">
+            <button id="btn-open-custom-task" type="button" class="w-full py-2 px-3 rounded-xl border border-dashed border-indigo-300 text-indigo-600 hover:bg-indigo-50 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
+              <span>➕ 新增自定义考核项目（宏观调控扩展）</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: 30-DAY FULL MATRIX & DAILY COMPARISON -->
+    <div id="view-matrix" class="hidden space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">📅 30天全景积分与项目追踪矩阵</h2>
+            <p class="text-xs text-slate-500 mt-0.5">纵览整月 30 天春春与毛毛每日积分对比，以及每个项目在 30 天内哪天做了、谁做的、是否截胡</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="matrix-cat-filter" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium text-slate-700">
+              <option value="all">显示全部分区项目</option>
+              <option value="pet">🧹 1. 宠物主子伺候专区</option>
+              <option value="chore">🏠 2. 日常家务与起居专区</option>
+              <option value="growth">📖 3. 个人提升与行政管理专区</option>
+              <option value="spirit">🧘‍♀️ 4. 情绪价值与精神修行专区</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 30-Day Daily Score Summary Table -->
+        <div class="mb-6">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">📊 每日积分汇总对比（点击任意天可直接跳转编辑）</h3>
+          <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-xl">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr id="matrix-summary-header" class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                  <!-- Populated by JS -->
+                </tr>
+              </thead>
+              <tbody id="matrix-summary-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 30-Day Per-Project Matrix Table -->
+        <div>
+          <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">📋 各项目 30 天完成情况全景表</h3>
+            <div class="flex items-center gap-3 text-xs">
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block"></span> 春春完成</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-pink-600 inline-block"></span> 毛毛完成</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span> 双方均完成</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> 🚀 含截胡/代劳</span>
+            </div>
+          </div>
+          <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-xl max-h-[540px]">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="sticky top-0 z-10 bg-slate-100 text-slate-700 border-b border-slate-200">
+                <tr id="matrix-tasks-header">
+                  <!-- Populated by JS -->
+                </tr>
+              </thead>
+              <tbody id="matrix-tasks-body" class="divide-y divide-slate-100">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: WISH SHOP & 3K FUND POOL -->
+    <div id="view-shop" class="hidden space-y-5">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Left 2 Columns: Reward Catalog -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">🎁 积分消费商城（愿望清单核销）</h2>
+              <p class="text-xs text-slate-500 mt-0.5">1 积分 = 1 元人民币 · 兑换后自动扣减个人可用积分并计入当月 3000 元家庭基金核销</p>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-semibold">春春可用: <strong id="shop-chun-avail">0</strong> 分</span>
+              <span class="px-2.5 py-1 rounded-lg bg-pink-50 text-pink-700 font-semibold">毛毛可用: <strong id="shop-mao-avail">0</strong> 分</span>
+            </div>
+          </div>
+
+          <div id="shop-items-container" class="space-y-5">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Right Column: Redemption History & Mystery Box -->
+        <div class="space-y-4">
+          <!-- 50-Pt Mystery Box -->
+          <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-4 text-white shadow-md">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold flex items-center gap-1.5">🎰 家庭自制盲盒抽奖</h3>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/20">50 积分 / 次</span>
+            </div>
+            <p class="text-xs text-indigo-100 mt-1">消耗 50 积分抽取惊喜盲盒奖励（免洗碗券、专属按摩券、奶茶免单、心愿小礼物等）！</p>
+            <div id="lottery-result-box" class="mt-3 p-3 rounded-xl bg-white/10 border border-white/15 text-center text-xs font-semibold min-h-[48px] flex items-center justify-center">
+              ✨ 点击下方按钮立即开盒 ✨
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <button id="btn-lottery-chun" type="button" class="py-2 px-3 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-xs transition-all">
+                🧑🏻‍💻 春春抽一次 (-50分)
+              </button>
+              <button id="btn-lottery-mao" type="button" class="py-2 px-3 rounded-xl bg-pink-500 text-white hover:bg-pink-400 font-bold text-xs transition-all">
+                👩🏻‍🎨 毛毛抽一次 (-50分)
+              </button>
+            </div>
+          </div>
+
+          <!-- Redemption Ledger -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+            <h3 class="text-sm font-bold text-slate-900 mb-3">🧾 积分兑换与基金核销流水</h3>
+            <div id="shop-history-list" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-1">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: RULES & DATA BACKUP -->
+    <div id="view-rules" class="hidden space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-3">
+          <h2 class="text-base font-bold text-slate-900">⚖️ 《毛春家庭新政》五大核心运行机制</h2>
+          <ul class="space-y-2.5 text-xs text-slate-700 leading-relaxed">
+            <li class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <strong class="text-slate-900 block mb-0.5">1. ⚖️ 双盲交叉审核机制（防腐败）</strong>
+              任何人不能给自己私自签字通过。每天晚上 11 点前睡之前，双方进行财务结算：毛毛的积分由春春检查签字，春春的积分由毛毛检查签字。
+            </li>
+            <li class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <strong class="text-slate-900 block mb-0.5">2. 💰 3k 基金绝对红线（防破产）</strong>
+              1 积分 = 1 元人民币。每月全家最多可兑现 3000 积分（3000元），超出的积分自动滚入“🏦 家庭中央银行”留作未来买大件（金子/电脑/手机/车/房）。每日建议每人赚取积分控制在 50 分左右。
+            </li>
+            <li class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <strong class="text-slate-900 block mb-0.5">3. 🏅 牵头与配合机制（防推诿）</strong>
+              牵头人负责主动发起任务、安排时间并承担主要劳动，标定积分归牵头人所有；配合人听从指挥提供协助，配合是家庭义务。
+            </li>
+            <li class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+              <strong class="text-amber-900 block mb-0.5">4. 🚀 “截胡”与代劳机制（主动抢分池）</strong>
+              所有明确了“专属负责人”或“牵头人”的项目，如果另一方主动去完成了本属于对方的任务（代劳），或在对方还没发起时主动把活干了（截胡），点击项目右侧的 <strong>“🚀 截胡/代劳”</strong> 按钮，该任务的积分全额划归主动执行方！
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+          <h2 class="text-base font-bold text-slate-900">💾 账本数据备份、导出与演示数据</h2>
+          <p class="text-xs text-slate-500">所有打卡记录自动保存在当前浏览器本地存储中。你也可以随时导出 JSON 备份或加载示例数据体验完整效果。</p>
+
+          <div class="flex flex-wrap gap-2">
+            <button id="btn-load-demo" type="button" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors">
+              ✨ 加载多日演示打卡数据
+            </button>
+            <button id="btn-export-data" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold transition-colors">
+              📤 导出积分账本 JSON
+            </button>
+            <button id="btn-clear-all" type="button" class="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition-colors">
+              🗑️ 重置全部账本数据
+            </button>
+          </div>
+
+          <div class="space-y-2 pt-2">
+            <label for="backup-json-textarea" class="text-xs font-semibold text-slate-700 block">📋 账本 JSON 数据导入 / 导出预览框：</label>
+            <textarea id="backup-json-textarea" rows="6" placeholder="点击上方“导出积分账本 JSON”可在此复制备份；或粘贴备份 JSON 后点击下方“导入恢复”..." class="w-full text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+            <button id="btn-import-data" type="button" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors">
+              📥 从文本框导入恢复账本
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 5: DUAL-PHONE CLOUD SYNC & APPLE/ANDROID GUIDE -->
+    <div id="view-sync" class="hidden space-y-5">
+      <!-- Top Banner: Current Identity & Live Sync Status -->
+      <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-5 text-white shadow-md">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-xs font-semibold">
+              <span>🍎 苹果 iOS + 🤖 安卓 Android 双端通用</span>
+            </div>
+            <h2 class="text-lg sm:text-xl font-bold">毛毛在家打卡 · 春春在公司打卡 · 双机数据互通中心</h2>
+            <p class="text-xs text-indigo-100 max-w-2xl">
+              采用<strong>“按项目时间戳智能合并算法”</strong>：你在家积毛毛的分、他在公司积春春的分（或互相截胡），两边数据合并时<strong>自动保留双方最新成果，绝不互相覆盖</strong>！
+            </p>
+          </div>
+          <!-- Current Device Identity Switcher -->
+          <div class="bg-white/15 backdrop-blur-xs border border-white/20 rounded-xl p-3 flex flex-col gap-1.5 min-w-[220px]">
+            <span class="text-[11px] text-indigo-100 font-semibold">📱 当前这台手机是谁在用？</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button id="btn-role-mao" type="button" class="py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-pink-500 text-white shadow-xs">
+                👩🏻‍🎨 我是毛毛(在家)
+              </button>
+              <button id="btn-role-chun" type="button" class="py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-white/20 text-white hover:bg-white/30">
+                🧑🏻‍💻 我是春春(工作)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- Mode 1: Real-time Cloud Room Sync -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">方案 A · 自动云端同步</span>
+              <h3 class="text-base font-bold text-slate-900 mt-1">☁️ 家庭云端共享房间（两台手机输入同一暗号）</h3>
+            </div>
+            <span id="cloud-room-badge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+              未连接云房间
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-600 leading-relaxed">
+            毛毛和春春在各自手机上输入同一个<strong>专属家庭房间号</strong>（例如：<code>maochun2026</code>），点击“连接并立即同步”。每次一方打卡后点击同步（或开启自动同步），两边数据即可通过云端实时拉取合并！
+          </p>
+
+          <div class="space-y-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
+            <div>
+              <label for="cloud-room-input" class="font-bold text-slate-700 block mb-1">🔑 家庭专属同步房间暗号（双方填一样的英文+数字）：</label>
+              <div class="flex gap-2">
+                <input id="cloud-room-input" type="text" value="maochun2026" placeholder="如：maochun2026" class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <button id="btn-cloud-sync-now" type="button" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-colors shrink-0">
+                  🔄 立即云端双向同步
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-200/80 text-[11px] text-slate-500">
+              <label class="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-700">
+                <input id="chk-auto-cloud-sync" type="checkbox" class="rounded text-indigo-600" checked />
+                <span>每次打卡后自动推送到云端房间</span>
+              </label>
+              <span id="last-sync-time-label">上次同步：尚未同步</span>
+            </div>
+          </div>
+
+          <div id="cloud-sync-log" class="p-3 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] leading-relaxed">
+            💡 状态就绪：在两台手机打开本网页，填入相同暗号“maochun2026”并点击「立即云端双向同步」即可互通。
+          </div>
+        </div>
+
+        <!-- Mode 2: WeChat 1-Click Smart Merge Code (100% Offline/Firewall-proof) -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">方案 B · 微信秒传合并（最稳妥·零配置）</span>
+              <h3 class="text-base font-bold text-slate-900 mt-1">💬 微信一键“同步口令”智能合并</h3>
+            </div>
+            <span class="text-xs font-semibold text-indigo-600">无需配置 · 1秒合账</span>
+          </div>
+
+          <p class="text-xs text-slate-600 leading-relaxed">
+            如果你们平时用微信联系，这是最简单、永不受网络限制的方式：<br/>
+            1️⃣ <strong>毛毛在家</strong>打完卡，点下方<strong>「复制我的打卡口令」</strong>发给春春微信；<br/>
+            2️⃣ <strong>春春在公司</strong>打完自己的卡，把毛毛发的口令粘贴到下方点<strong>「智能合并对方记录」</strong>，系统会自动把毛毛在家做的 + 春春在公司做的合二为一！
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button id="btn-gen-wechat-code" type="button" class="py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+              <span>📤 1. 复制我的打卡口令发微信</span>
+            </button>
+            <button id="btn-merge-wechat-code" type="button" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+              <span>📥 2. 粘贴对方口令并智能合并</span>
+            </button>
+          </div>
+
+          <div>
+            <textarea id="wechat-sync-textarea" rows="3" placeholder="生成的微信同步口令会显示在这里；或者把伴侣从微信发来的【毛春同步口令】粘贴到这里，点击上方绿色按钮即可合账..." class="w-full text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Apple iOS & Android Installation Guide -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">📱 如何把这个软件装进毛毛和春春的手机里（像原生 App 一样点图标即用）？</h3>
+            <p class="text-xs text-slate-500 mt-0.5">苹果 iPhone 与安卓手机均完全支持，无需去应用商店审核，按下面 2 步即可放到手机桌面</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <span>🌐 第一步：获取手机访问链接或文件</span>
+            </div>
+            <p class="text-slate-600 leading-relaxed">
+              你可以直接将本单文件网页（<code>maochun_points_system.html</code>）托管到任何免费静态空间（如 GitHub Pages、Cloudflare Pages、Vercel，拖进去 10 秒自动生成专属网址），或者直接把文件发到手机微信/浏览器打开。
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-indigo-50/60 border border-indigo-200 space-y-2">
+            <div class="text-sm font-bold text-indigo-950 flex items-center gap-1.5">
+              <span>🍎 苹果 iPhone 手机安装方法</span>
+            </div>
+            <p class="text-indigo-900 leading-relaxed">
+              1. 用 iPhone 自带的 <strong>Safari 浏览器</strong>打开网址/文件；<br/>
+              2. 点击底部正中间的<strong>「分享按钮 📤」</strong>；<br/>
+              3. 往下滑点击<strong>「添加到主屏幕 (Add to Home Screen)」</strong>，手机桌面就会生成<strong>「毛春积分」</strong>专属图标，全屏运行！
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-2">
+            <div class="text-sm font-bold text-emerald-950 flex items-center gap-1.5">
+              <span>🤖 安卓 Android 手机安装方法</span>
+            </div>
+            <p class="text-emerald-900 leading-relaxed">
+              1. 用安卓自带浏览器、<strong>Chrome 或 Edge</strong> 打开；<br/>
+              2. 点击右上角菜单<strong>「⋮」</strong>或底部菜单；<br/>
+              3. 选择<strong>「添加到主屏幕」</strong>或<strong>「安装应用」</strong>，即可在手机桌面生成独立 App 图标，随时随地打卡！
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Custom Task Modal -->
+  <div id="modal-custom-task" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-5 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-900">➕ 新增自定义家庭积分项目</h3>
+        <button id="btn-close-custom-modal" type="button" class="text-slate-400 hover:text-slate-600 text-sm">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label for="custom-task-name" class="font-semibold text-slate-700 block mb-1">项目名称</label>
+          <input id="custom-task-name" type="text" placeholder="例如：周末给家里换鲜花" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="custom-task-cat" class="font-semibold text-slate-700 block mb-1">所属专区</label>
+            <select id="custom-task-cat" class="w-full border border-slate-300 rounded-lg px-2.5 py-2">
+              <option value="pet">🧹 1. 宠物主子伺候</option>
+              <option value="chore">🏠 2. 日常家务与起居</option>
+              <option value="growth">📖 3. 个人提升与行政</option>
+              <option value="spirit">🧘‍♀️ 4. 情绪价值与修行</option>
+            </select>
+          </div>
+          <div>
+            <label for="custom-task-pts" class="font-semibold text-slate-700 block mb-1">单次积分分值</label>
+            <input id="custom-task-pts" type="number" min="1" max="100" value="5" class="w-full border border-slate-300 rounded-lg px-3 py-2" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="custom-task-mode" class="font-semibold text-slate-700 block mb-1">积分与归属模式</label>
+            <select id="custom-task-mode" class="w-full border border-slate-300 rounded-lg px-2.5 py-2">
+              <option value="chun">春春负责/牵头 (支持毛毛截胡)</option>
+              <option value="mao">毛毛负责/牵头 (支持春春截胡)</option>
+              <option value="both">双方各自负责 (双轨独立打勾)</option>
+            </select>
+          </div>
+          <div>
+            <label for="custom-task-Counter" class="font-semibold text-slate-700 block mb-1">计分方式</label>
+            <select id="custom-task-Counter" class="w-full border border-slate-300 rounded-lg px-2.5 py-2">
+              <option value="once">单次打勾完成 (1次/天)</option>
+              <option value="multi">可多次累加 (+1次, 如口吐莲花)</option>
+              <option value="chunk2h">按2小时累加 (每2h积1次)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+        <button id="btn-cancel-custom-task" type="button" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200">取消</button>
+        <button id="btn-save-custom-task" type="button" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700">保存并加入项目表</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-2">
+    <div id="toast-box" class="bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2">
+      <span id="toast-text">操作成功</span>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. COMPLETE TASK CATALOG FROM 《毛春家庭新政10.18.md》 (All 75 Tasks)
+    // =========================================================================
+    // mode:
+    // - 'chun': 春春负责 or 春春牵头 (Default credits 春春; 毛毛 can 🚀截胡/代劳)
+    // - 'mao': 毛毛负责 or 毛毛牵头 or 毛毛专属 (Default credits 毛毛; 春春 can 🚀截胡/代劳)
+    // - 'both': 毛毛和春春各自负责 / 个人任务 / 共同遵守 (Independent controls for both 春春 & 毛毛)
+    // - 'weekday_pet': 周二、六春春负责，周四毛毛负责 (Auto-detects default owner by weekday, other can 🚀截胡/代劳)
+    // - 'day_night_dog': 日间毛毛负责，晚间春春负责 (Shows two sub-slots or dual credit with steal support)
+    //
+    // countType:
+    // - 'once': 每日单次打勾 (0 or 1)
+    // - 'multi': 每日可多次累加 (+1/-1 stepper, e.g., 口吐莲花, 铲猫砂)
+    // - 'duration': 按时长阶段累加 (+1单位 = X小时 = Y分, e.g., 毛毛学习新领域 5分/2小时)
+
+    const INITIAL_TASKS = [
+      // ---------------- 🧹 1. 宠物主子伺候专区 (17项) ----------------
+      { id: 'pet_1', cat: 'pet', name: '铲猫砂', pts: 2, unitText: '2分 / 次', roleText: '春春负责', freqText: '每天 (晨/晚)', mode: 'chun', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'pet_2', cat: 'pet', name: '给猫零食喂', pts: 2, unitText: '2分 / 次', roleText: '春春负责', freqText: '每天', mode: 'chun', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'pet_3', cat: 'pet', name: '给狗零食喂', pts: 2, unitText: '2分 / 次', roleText: '春春负责', freqText: '每天', mode: 'chun', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'pet_4', cat: 'pet', name: '给猫猫刷牙', pts: 2, unitText: '2分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周三、周五 晚上', mode: 'chun', countType: 'once', unitLabel: '次', days: [3,5] },
+      { id: 'pet_5', cat: 'pet', name: '清洗狗猫宝贝(们)的碗', pts: 3, unitText: '3分 / 次', roleText: '春春负责', freqText: '每周三 晚上', mode: 'chun', countType: 'once', unitLabel: '次', days: [3] },
+      { id: 'pet_6', cat: 'pet', name: '陪猫，逗猫（两只猫各10min）', pts: 2, unitText: '2分 / 次', roleText: '周二、六春春负责，周四毛毛负责', freqText: '每周二、四、六', mode: 'weekday_pet', countType: 'once', unitLabel: '次', days: [2,4,6] },
+      { id: 'pet_7', cat: 'pet', name: '陪狗嗅玩，2根剪碎', pts: 2, unitText: '2分 / 次', roleText: '周二、六春春负责，周四毛毛负责', freqText: '每周二、四、六', mode: 'weekday_pet', countType: 'once', unitLabel: '次', days: [2,4,6] },
+      { id: 'pet_8a', cat: 'pet', name: '遛狗0.5h - 日间场（放下手机认真陪）', pts: 3, unitText: '3分 / 次', roleText: '日间毛毛负责 (春春可代劳)', freqText: '每天 日间', mode: 'mao', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'pet_8b', cat: 'pet', name: '遛狗0.5h - 晚间场（放下手机认真陪）', pts: 3, unitText: '3分 / 次', roleText: '晚间春春负责 (毛毛可代劳)', freqText: '每天 晚间', mode: 'chun', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'pet_9', cat: 'pet', name: '沉浸式抱小黑黄瓜奶油各15分钟', pts: 15, unitText: '15分 / 次', roleText: '春春牵头，毛毛负责', freqText: '每周五 晚上', mode: 'both', countType: 'once', unitLabel: '次', days: [5] },
+      { id: 'pet_10', cat: 'pet', name: '84清洁猫躺5处地方', pts: 6, unitText: '6分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'pet_11', cat: 'pet', name: '84清洁狗阳台', pts: 8, unitText: '8分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'pet_12', cat: 'pet', name: '周末带狗躺草地晒太阳', pts: 8, unitText: '8分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'pet_13', cat: 'pet', name: '一周带小猫小狗在家里磕头', pts: 3, unitText: '3分 / 次', roleText: '毛毛牵头，春春配合', freqText: '每周六 早上', mode: 'mao', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'pet_14', cat: 'pet', name: '洗小黑', pts: 15, unitText: '15分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每月 1 次', mode: 'chun', countType: 'once', unitLabel: '次', days: 'monthly' },
+      { id: 'pet_15', cat: 'pet', name: '洗黄瓜', pts: 15, unitText: '15分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每月 1 次', mode: 'chun', countType: 'once', unitLabel: '次', days: 'monthly' },
+      { id: 'pet_16', cat: 'pet', name: '洗奶油', pts: 15, unitText: '15分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每月 1 次', mode: 'chun', countType: 'once', unitLabel: '次', days: 'monthly' },
+      { id: 'pet_17', cat: 'pet', name: '定期记录黑，瓜，奶，糖，丰', pts: 5, unitText: '5分 / 次', roleText: '共同/视情况 (谁做谁得分)', freqText: '定期/按需', mode: 'both', countType: 'multi', unitLabel: '次', days: 'ondemand' },
+
+      // ---------------- 🏠 2. 日常家务与起居专区 (42项) ----------------
+      { id: 'chore_1', cat: 'chore', name: '早上8点30前起床', pts: 5, unitText: '5分 / 次', roleText: '毛毛负责', freqText: '每天', mode: 'mao', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_2', cat: 'chore', name: '早上7点10前起床', pts: 5, unitText: '5分 / 次', roleText: '春春负责', freqText: '每天', mode: 'chun', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_3', cat: 'chore', name: '起床和宝贝们问好行为+话术sop', pts: 2, unitText: '2分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_4', cat: 'chore', name: '毛毛早上刷牙', pts: 1, unitText: '1分 / 次', roleText: '毛毛负责', freqText: '每天 (早)', mode: 'mao', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_5', cat: 'chore', name: '毛毛早上护肤', pts: 1, unitText: '1分 / 次', roleText: '毛毛负责', freqText: '每天 (早)', mode: 'mao', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_6', cat: 'chore', name: '毛毛给自己泡咖啡', pts: 1, unitText: '1分 / 次', roleText: '毛毛负责', freqText: '每天/按需', mode: 'mao', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_7', cat: 'chore', name: '毛毛给自己泡茶', pts: 1, unitText: '1分 / 次', roleText: '毛毛负责', freqText: '每天/按需', mode: 'mao', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_8', cat: 'chore', name: '吃早饭 (规律作息奖励)', pts: 1, unitText: '1分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_9', cat: 'chore', name: '吃中饭 (规律作息奖励)', pts: 2, unitText: '2分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_10', cat: 'chore', name: '吃晚饭 (规律作息奖励)', pts: 2, unitText: '2分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_11', cat: 'chore', name: '洗头', pts: 3, unitText: '3分 / 次', roleText: '毛毛和春春各自负责', freqText: '按需/定期', mode: 'both', countType: 'once', unitLabel: '次', days: 'ondemand' },
+      { id: 'chore_12', cat: 'chore', name: '洗澡', pts: 3, unitText: '3分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_13', cat: 'chore', name: '睡前刷牙', pts: 1, unitText: '1分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天 (晚)', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_14', cat: 'chore', name: '睡前护肤', pts: 2, unitText: '2分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天 (晚)', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_15', cat: 'chore', name: '睡前清洗pp', pts: 2, unitText: '2分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天 (晚)', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_16', cat: 'chore', name: '睡前清洗jiojio', pts: 2, unitText: '2分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天 (晚)', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_17', cat: 'chore', name: '11点前睡', pts: 5, unitText: '5分 / 次', roleText: '个人任务 (各自独立积分)', freqText: '每天', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_18', cat: 'chore', name: '做饭', pts: 10, unitText: '10分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每天/按需', mode: 'chun', countType: 'multi', unitLabel: '顿', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_19', cat: 'chore', name: '洗碗', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每天/按需', mode: 'chun', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_20', cat: 'chore', name: '洗衣服', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周二、五、日', mode: 'chun', countType: 'once', unitLabel: '次', days: [2,5,0] },
+      { id: 'chore_21', cat: 'chore', name: '收衣服', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周二、五、日', mode: 'chun', countType: 'once', unitLabel: '次', days: [2,5,0] },
+      { id: 'chore_22', cat: 'chore', name: '换被套', pts: 4, unitText: '4分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周一、三、六', mode: 'chun', countType: 'once', unitLabel: '次', days: [1,3,6] },
+      { id: 'chore_23', cat: 'chore', name: '换床套', pts: 4, unitText: '4分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周一、三、六', mode: 'chun', countType: 'once', unitLabel: '次', days: [1,3,6] },
+      { id: 'chore_24', cat: 'chore', name: '清理床上毛', pts: 2, unitText: '2分 / 次', roleText: '春春牵头', freqText: '每天晚上', mode: 'chun', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_25', cat: 'chore', name: '定期清理娃娃', pts: 4, unitText: '4分 / 次', roleText: '毛毛牵头，春春配合', freqText: '每月 1 次', mode: 'mao', countType: 'once', unitLabel: '次', days: 'monthly' },
+      { id: 'chore_26', cat: 'chore', name: '刷马桶', pts: 4, unitText: '4分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_27', cat: 'chore', name: '扫内外厕所', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_28', cat: 'chore', name: '拖地内外厕所(84)', pts: 10, unitText: '10分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_29', cat: 'chore', name: '清理浴室窗户', pts: 4, unitText: '4分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_30', cat: 'chore', name: '擦客厅玻璃', pts: 5, unitText: '5分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每两周 1 次', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_31', cat: 'chore', name: '清扫厨房地面', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_32', cat: 'chore', name: '拖地厨房地面(84)', pts: 8, unitText: '8分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_33', cat: 'chore', name: '清理厨房台面', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_34', cat: 'chore', name: '擦净厨房台面', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_35', cat: 'chore', name: '丢厨房杂物', pts: 2, unitText: '2分 / 次', roleText: '共同/视情况', freqText: '每天/按需', mode: 'both', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'chore_36', cat: 'chore', name: '进门柜子清理', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_37', cat: 'chore', name: '进门柜子擦拭', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_38', cat: 'chore', name: '摆放进门柜子（按标准）', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_39', cat: 'chore', name: '客厅地面整理，清扫', pts: 3, unitText: '3分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_40', cat: 'chore', name: '客厅地面拖净(84)', pts: 10, unitText: '10分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六 (大扫除)', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'chore_41', cat: 'chore', name: '客厅台面椅面视觉清理摆放', pts: 5, unitText: '5分 / 次', roleText: '春春牵头，毛毛配合', freqText: '按需/定期', mode: 'chun', countType: 'once', unitLabel: '次', days: 'ondemand' },
+      { id: 'chore_42', cat: 'chore', name: '学习桌子清理', pts: 3, unitText: '3分 / 次', roleText: '毛毛负责', freqText: '每周一、三、五', mode: 'mao', countType: 'once', unitLabel: '次', days: [1,3,5] },
+      { id: 'chore_43', cat: 'chore', name: '学习桌子擦净', pts: 3, unitText: '3分 / 次', roleText: '毛毛负责', freqText: '每周一、三、五', mode: 'mao', countType: 'once', unitLabel: '次', days: [1,3,5] },
+      { id: 'chore_44', cat: 'chore', name: '学习桌子整理（只摆学习有关）', pts: 2, unitText: '2分 / 次', roleText: '毛毛负责', freqText: '每周一、三、五', mode: 'mao', countType: 'once', unitLabel: '次', days: [1,3,5] },
+
+      // ---------------- 📖 3. 个人提升与行政管理专区 (13项) ----------------
+      { id: 'growth_1', cat: 'growth', name: '准备护肤的东西', pts: 2, unitText: '2分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天/按需', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'growth_2', cat: 'growth', name: '准备化妆的东西', pts: 2, unitText: '2分 / 次', roleText: '毛毛牵头，春春收尾', freqText: '按需开展任务', mode: 'mao', countType: 'once', unitLabel: '次', days: 'ondemand' },
+      { id: 'growth_3', cat: 'growth', name: '准备学习的东西', pts: 2, unitText: '2分 / 次', roleText: '毛毛和春春各自负责', freqText: '每天/按需', mode: 'both', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'growth_4', cat: 'growth', name: '导入照片', pts: 5, unitText: '5分 / 次', roleText: '个人任务 (各自独立积分)', freqText: '按需/定期', mode: 'both', countType: 'multi', unitLabel: '次', days: 'ondemand' },
+      { id: 'growth_5', cat: 'growth', name: 'icloud 保存文档', pts: 2, unitText: '2分 / 次', roleText: '个人任务 (各自独立积分)', freqText: '按需/定期', mode: 'both', countType: 'multi', unitLabel: '次', days: 'ondemand' },
+      { id: 'growth_6', cat: 'growth', name: '毛毛傍晚或上午放风一次', pts: 5, unitText: '5分 / 次', roleText: '毛毛个人', freqText: '每天/按需', mode: 'mao', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'growth_7', cat: 'growth', name: '学习职业路线0.5h', pts: 5, unitText: '5分 / 0.5h', roleText: '个人任务 (每0.5h积1次)', freqText: '每天/按需', mode: 'both', countType: 'duration', hoursPerUnit: 0.5, unitLabel: '0.5h', days: [0,1,2,3,4,5,6] },
+      { id: 'growth_8', cat: 'growth', name: '毛毛学习新领域（每满2小时积1次）', pts: 5, unitText: '5分 / 2小时', roleText: '毛毛个人 (完成3次即6h=15分)', freqText: '每周/按需', mode: 'mao', countType: 'duration', hoursPerUnit: 2, unitLabel: '2小时', days: [0,1,2,3,4,5,6] },
+      { id: 'growth_9', cat: 'growth', name: '周末和毛毛进行职业路线会议0.5h', pts: 5, unitText: '5分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六', mode: 'chun', countType: 'duration', hoursPerUnit: 0.5, unitLabel: '0.5h', days: [6] },
+      { id: 'growth_10', cat: 'growth', name: '春春编写假期周末游玩剧本', pts: 15, unitText: '15分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周五 晚上', mode: 'chun', countType: 'once', unitLabel: '次', days: [5] },
+      { id: 'growth_11', cat: 'growth', name: '周末主动找毛毛记账', pts: 5, unitText: '5分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周六', mode: 'chun', countType: 'once', unitLabel: '次', days: [6] },
+      { id: 'growth_12', cat: 'growth', name: '一毛钱不花要加分', pts: 5, unitText: '5分 / 天', roleText: '个人任务 (各自独立积分)', freqText: '每天', mode: 'both', countType: 'once', unitLabel: '天', days: [0,1,2,3,4,5,6] },
+      { id: 'growth_13', cat: 'growth', name: '周末主动和毛毛学习之前交待过打印的文件', pts: 5, unitText: '5分 / 次', roleText: '春春牵头，毛毛配合', freqText: '每周日 晚上', mode: 'chun', countType: 'once', unitLabel: '次', days: [0] },
+
+      // ---------------- 🧘‍♀️ 4. 情绪价值与精神修行专区 (16项) ----------------
+      { id: 'spirit_1', cat: 'spirit', name: '晚安/早安：行为+话术sop', pts: 3, unitText: '3分 / 次', roleText: '白天春春对毛毛说，毛毛对自己和狗说', freqText: '每天', mode: 'both', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_2', cat: 'spirit', name: '每日专注聊天沟通0.5h', pts: 6, unitText: '6分 / 次', roleText: '春春精心准备', freqText: '每天', mode: 'chun', countType: 'duration', hoursPerUnit: 0.5, unitLabel: '0.5h', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_3', cat: 'spirit', name: '工作日白天和毛毛聊0.5h', pts: 5, unitText: '5分 / 次', roleText: '春春负责', freqText: '工作日每天', mode: 'chun', countType: 'duration', hoursPerUnit: 0.5, unitLabel: '0.5h', days: [1,2,3,4,5] },
+      { id: 'spirit_4', cat: 'spirit', name: '给毛毛洗脚（含捏、搓、要问舒不舒服）', pts: 5, unitText: '5分 / 次', roleText: '春春专属', freqText: '每天/按需', mode: 'chun', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_5', cat: 'spirit', name: '不准说脏话', pts: 1, unitText: '1分 / 次', roleText: '毛毛和春春共同遵守', freqText: '每天', mode: 'both', countType: 'once', unitLabel: '天', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_6', cat: 'spirit', name: '施食', pts: 1, unitText: '1分 / 次', roleText: '毛毛专属', freqText: '每天/按需', mode: 'mao', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_7', cat: 'spirit', name: '⭐ 念佛经（非常重要）', pts: 5, unitText: '5分 / 0.5小时', roleText: '毛毛和春春各自负责', freqText: '每天必做', mode: 'both', countType: 'duration', hoursPerUnit: 0.5, unitLabel: '0.5h', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_8', cat: 'spirit', name: '念佛号（每1000遍积1次）', pts: 4, unitText: '4分 / 1000遍', roleText: '毛毛专属', freqText: '每天/按需', mode: 'mao', countType: 'multi', unitLabel: '千遍', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_9', cat: 'spirit', name: '描佛像', pts: 5, unitText: '5分 / 0.5小时', roleText: '毛毛专属', freqText: '每天/按需', mode: 'mao', countType: 'duration', hoursPerUnit: 0.5, unitLabel: '0.5h', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_10', cat: 'spirit', name: '弹琴', pts: 4, unitText: '4分 / 1小时', roleText: '毛毛专属', freqText: '每天/按需', mode: 'mao', countType: 'duration', hoursPerUnit: 1, unitLabel: '1小时', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_11', cat: 'spirit', name: '语音记录日记（关注自己开心，只与利益相关≤10件事）', pts: 5, unitText: '5分 / 次', roleText: '毛毛专属', freqText: '每天', mode: 'mao', countType: 'once', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_12', cat: 'spirit', name: '识别假微压力去做事', pts: 1, unitText: '1分 / 次', roleText: '毛毛专属', freqText: '每天/随时', mode: 'mao', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_13', cat: 'spirit', name: '像弥勒佛一样时时事事开心，喜乐，自在', pts: 5, unitText: '5分 / 6小时', roleText: '毛毛专属 (每6h积1次)', freqText: '每天/随时', mode: 'mao', countType: 'duration', hoursPerUnit: 6, unitLabel: '6小时', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_14', cat: 'spirit', name: '🌸 口吐莲花（对伴侣提供正向反馈与夸奖）', pts: 1, unitText: '1分 / 次', roleText: '毛毛和春春共同做到 (高频计次)', freqText: '每天/随时', mode: 'both', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_15', cat: 'spirit', name: '启动“NPC防消耗护盾”（成功隔绝外界消耗）', pts: 1, unitText: '1分 / 次', roleText: '毛毛专属 (高频计次)', freqText: '每天/随时', mode: 'mao', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] },
+      { id: 'spirit_16', cat: 'spirit', name: '自我疗愈与接纳（一秒出轮回）', pts: 1, unitText: '1分 / 次', roleText: '毛毛专属 (高频计次)', freqText: '每天/随时', mode: 'mao', countType: 'multi', unitLabel: '次', days: [0,1,2,3,4,5,6] }
+    ];
+
+    const CATEGORY_META = {
+      pet: { title: '🧹 1. 宠物主子伺候专区', subtitle: '猫猫小黑、黄瓜、奶油与狗狗宝贝的日常照料与大扫除', badgeClass: 'bg-amber-50 text-amber-800 border-amber-200' },
+      chore: { title: '🏠 2. 日常家务与起居专区', subtitle: '规律作息奖励、个人卫生习惯与家庭公共卫生维护', badgeClass: 'bg-blue-50 text-blue-800 border-blue-200' },
+      growth: { title: '📖 3. 个人提升与行政管理专区', subtitle: '职业路线精进、新领域每2小时积分、记账与周末剧本', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+      spirit: { title: '🧘‍♀️ 4. 情绪价值与精神修行专区', subtitle: '口吐莲花高频计次、念佛经、专注沟通与正能量修行', badgeClass: 'bg-purple-50 text-purple-800 border-purple-200' }
+    };
+
+    const SHOP_ITEMS = [
+      { id: 'shop_1', group: '🍰 日常小确幸 (即时满足)', name: '玩手机 1 小时', defaultPts: 90, fixed: true, target: 'both', desc: '90积分 / 小时，即时兑换休闲时光' },
+      { id: 'shop_2', group: '🍰 日常小确幸 (即时满足)', name: '买美味蛋糕', defaultPts: 68, fixed: false, target: 'both', desc: '实际价格 × 1 积分（可输入实际金额）' },
+      { id: 'shop_3', group: '🍰 日常小确幸 (即时满足)', name: '买浪漫花束', defaultPts: 59, fixed: false, target: 'both', desc: '实际价格 × 1 积分' },
+      { id: 'shop_4', group: '🍰 日常小确幸 (即时满足)', name: '买精致瓷器', defaultPts: 120, fixed: false, target: 'both', desc: '实际价格 × 1 积分' },
+      { id: 'shop_5', group: '🍰 日常小确幸 (即时满足)', name: '买养生花茶', defaultPts: 45, fixed: false, target: 'both', desc: '实际价格 × 1 积分' },
+      { id: 'shop_6', group: '👗 中长期心愿 (延迟满足)', name: '买新衣 (春春 / 毛毛)', defaultPts: 299, fixed: false, target: 'both', desc: '实际价格 × 1 积分' },
+      { id: 'shop_7', group: '👗 中长期心愿 (延迟满足)', name: '买新鞋 (春春专属)', defaultPts: 399, fixed: false, target: 'chun', desc: '实际价格 × 1 积分' },
+      { id: 'shop_8', group: '👗 中长期心愿 (延迟满足)', name: '买化妆品 (毛毛专属)', defaultPts: 350, fixed: false, target: 'mao', desc: '实际价格 × 1 积分' },
+      { id: 'shop_9', group: '👗 中长期心愿 (延迟满足)', name: '买可爱娃娃 (毛毛专属)', defaultPts: 159, fixed: false, target: 'mao', desc: '实际价格 × 1 积分' },
+      { id: 'shop_10', group: '👗 中长期心愿 (延迟满足)', name: '回老家路费 (春春专属)', defaultPts: 500, fixed: false, target: 'chun', desc: '实际价格 × 1 积分' },
+      { id: 'shop_11', group: '💎 重大奖励 (大额结算 · 调拨3k基金)', name: '买金子（首饰）', defaultPts: 1500, fixed: false, target: 'both', desc: '实际价格 × 1 积分（可调拨家庭基金）' },
+      { id: 'shop_12', group: '💎 重大奖励 (大额结算 · 调拨3k基金)', name: '买新手机', defaultPts: 3000, fixed: false, target: 'both', desc: '实际价格 × 1 积分（全额调拨 3k 基金）' },
+      { id: 'shop_13', group: '💎 重大奖励 (大额结算 · 调拨3k基金)', name: '买新电脑', defaultPts: 3000, fixed: false, target: 'both', desc: '实际价格 × 1 积分（全额调拨 3k 基金）' }
+    ];
+
+    const LOTTERY_PRIZES = [
+      '🎟️ 免洗碗金牌券 1 张（对方无条件代劳一次）',
+      '💆🏻‍♀️ 沉浸式肩颈+洗脚尊享服务 20 分钟',
+      '🧋 喜茶/霸王茶姬心仪饮品免单券 1 杯',
+      '🌸 伴侣连续夸奖“口吐莲花”10句大礼包',
+      '🎬 周末电影夜选片绝对主导权 1 次',
+      '🍰 甜品小蛋糕加餐特权券 1 张',
+      '🛌 周末懒觉免叫醒特权 1 次'
+    ];
+
+    // =========================================================================
+    // 2. APPLICATION STATE & STORAGE
+    // =========================================================================
+    const STORAGE_KEY = 'maochun_points_system_v1';
+
+    let state = {
+      currentMonth: '2026-10',
+      selectedDay: 20, // Default to Day 20 (Oct 20, 2026)
+      activeView: 'daily',
+      deviceRole: 'mao', // 'mao' or 'chun'
+      cloudRoomId: 'maochun2026',
+      autoCloudSync: true,
+      lastSyncTime: '',
+      catFilter: 'all',
+      scheduleFilter: 'all',
+      ownerFilter: 'all',
+      searchQuery: '',
+      sideTab: 'done',
+      matrixCatFilter: 'all',
+      customTasks: [],
+      // records[monthKey][dayNum][taskId] = { chunCount: 0, maoCount: 0, stealBy: null | 'chun' | 'mao' }
+      records: {},
+      // audits[monthKey][dayNum] = { chunAuditedByMao: false, maoAuditedByChun: false }
+      audits: {},
+      // redemptions = [{ id, dateStr, who: 'chun'|'mao', itemName, pts }]
+      redemptions: []
+    };
+
+    function getAllTasks() {
+      return [...INITIAL_TASKS, ...(state.customTasks || [])];
+    }
+
+    // Weekday calculation for a given month ('2026-10') and day (1..30)
+    const WEEKDAY_NAMES = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    function getWeekday(monthStr, dayNum) {
+      const [y, m] = monthStr.split('-').map(Number);
+      const d = new Date(y, m - 1, dayNum);
+      return d.getDay(); // 0 (Sun) to 6 (Sat)
+    }
+
+    function isTaskRecommendedForDay(task, weekday) {
+      if (Array.isArray(task.days)) {
+        return task.days.includes(weekday);
+      }
+      return true; // 'monthly' or 'ondemand' can be done any day
+    }
+
+    // Determine effective default owner on a specific weekday for 'weekday_pet'
+    function getEffectiveMode(task, weekday) {
+      if (task.mode === 'weekday_pet') {
+        // 周二(2)、六(6)春春负责，周四(4)毛毛负责
+        if (weekday === 4) return 'mao';
+        return 'chun';
+      }
+      return task.mode;
+    }
+
+    function ensureDayRecord(monthStr, dayNum) {
+      if (!state.records[monthStr]) state.records[monthStr] = {};
+      if (!state.records[monthStr][dayNum]) state.records[monthStr][dayNum] = {};
+      return state.records[monthStr][dayNum];
+    }
+
+    function getTaskRecord(monthStr, dayNum, taskId) {
+      const dayRec = state.records[monthStr]?.[dayNum];
+      if (!dayRec || !dayRec[taskId]) {
+        return { chunCount: 0, maoCount: 0, stealBy: null };
+      }
+      return dayRec[taskId];
+    }
+
+    function setTaskRecord(monthStr, dayNum, taskId, rec) {
+      const dayRec = ensureDayRecord(monthStr, dayNum);
+      const nowTs = Date.now();
+      if (rec.chunCount <= 0 && rec.maoCount <= 0) {
+        dayRec[taskId] = {
+          chunCount: 0,
+          maoCount: 0,
+          stealBy: null,
+          updatedAt: nowTs
+        };
+      } else {
+        dayRec[taskId] = {
+          chunCount: Math.max(0, rec.chunCount || 0),
+          maoCount: Math.max(0, rec.maoCount || 0),
+          stealBy: rec.stealBy || null,
+          updatedAt: nowTs
+        };
+      }
+      saveState();
+      renderAll();
+      if (state.autoCloudSync && state.cloudRoomId) {
+        pushToCloudRoomSilent();
+      }
+    }
+
+    function seedInitialDemoData() {
+      // Seed realistic data on Day 18, 19, 20 of 2026-10 so the user immediately sees how 30-day tracking, multi-count, 2h learning, and steal work!
+      state.records['2026-10'] = {
+        18: {
+          pet_1: { chunCount: 2, maoCount: 0, stealBy: null },
+          chore_1: { chunCount: 0, maoCount: 1, stealBy: null },
+          chore_2: { chunCount: 1, maoCount: 0, stealBy: null },
+          chore_8: { chunCount: 1, maoCount: 1, stealBy: null },
+          chore_18: { chunCount: 1, maoCount: 0, stealBy: null },
+          spirit_7: { chunCount: 1, maoCount: 2, stealBy: null },
+          spirit_14: { chunCount: 3, maoCount: 4, stealBy: null }
+        },
+        19: {
+          pet_1: { chunCount: 1, maoCount: 1, stealBy: 'mao' }, // 毛毛代劳铲猫砂一次
+          chore_1: { chunCount: 0, maoCount: 1, stealBy: null },
+          chore_2: { chunCount: 1, maoCount: 0, stealBy: null },
+          chore_22: { chunCount: 1, maoCount: 0, stealBy: null },
+          chore_42: { chunCount: 0, maoCount: 1, stealBy: null },
+          growth_8: { chunCount: 0, maoCount: 2, stealBy: null }, // 毛毛学习4小时
+          spirit_14: { chunCount: 2, maoCount: 3, stealBy: null }
+        },
+        20: {
+          pet_1: { chunCount: 1, maoCount: 0, stealBy: null },
+          pet_6: { chunCount: 1, maoCount: 0, stealBy: null },
+          chore_1: { chunCount: 0, maoCount: 1, stealBy: null },
+          chore_2: { chunCount: 1, maoCount: 0, stealBy: null },
+          chore_8: { chunCount: 1, maoCount: 1, stealBy: null },
+          chore_19: { chunCount: 0, maoCount: 1, stealBy: 'mao' }, // 毛毛截胡洗碗！
+          growth_8: { chunCount: 0, maoCount: 3, stealBy: null }, // 毛毛学习新领域 3次=6小时=15分！
+          spirit_7: { chunCount: 1, maoCount: 1, stealBy: null },
+          spirit_14: { chunCount: 4, maoCount: 5, stealBy: null } // 口吐莲花多次累加！
+        }
+      };
+      state.audits['2026-10'] = {
+        18: { chunAuditedByMao: true, maoAuditedByChun: true },
+        19: { chunAuditedByMao: true, maoAuditedByChun: true },
+        20: { chunAuditedByMao: false, maoAuditedByChun: false }
+      };
+      state.redemptions = [
+        { id: 'r1', dateStr: '2026-10-19', who: 'mao', itemName: '买养生花茶', pts: 45 }
+      ];
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state = { ...state, ...parsed };
+          return;
+        }
+      } catch (e) {
+        // Fallback if localStorage is restricted
+      }
+      seedInitialDemoData();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        // Ignore storage errors in sandboxed iframe
+      }
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const textEl = document.getElementById('toast-text');
+      if (!container || !textEl) return;
+      textEl.textContent = msg;
+      container.classList.remove('opacity-0', 'translate-y-2');
+      container.classList.add('opacity-100', 'translate-y-0');
+      if (window._toastTimer) clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        container.classList.add('opacity-0', 'translate-y-2');
+        container.classList.remove('opacity-100', 'translate-y-0');
+      }, 2400);
+    }
+
+    // =========================================================================
+    // 3. SCORE CALCULATION HELPERS
+    // =========================================================================
+    function computeDayTotals(monthStr, dayNum) {
+      const tasks = getAllTasks();
+      const dayRec = state.records[monthStr]?.[dayNum] || {};
+      let chunPts = 0;
+      let maoPts = 0;
+      let chunItems = 0;
+      let maoItems = 0;
+      let stealCount = 0;
+      const doneEntries = [];
+
+      for (const task of tasks) {
+        const r = dayRec[task.id];
+        if (!r) continue;
+        const cCount = r.chunCount || 0;
+        const mCount = r.maoCount || 0;
+        if (cCount > 0) {
+          const pts = cCount * task.pts;
+          chunPts += pts;
+          chunItems += 1;
+          doneEntries.push({
+            task,
+            who: 'chun',
+            count: cCount,
+            pts,
+            isSteal: r.stealBy === 'chun'
+          });
+        }
+        if (mCount > 0) {
+          const pts = mCount * task.pts;
+          maoPts += pts;
+          maoItems += 1;
+          doneEntries.push({
+            task,
+            who: 'mao',
+            count: mCount,
+            pts,
+            isSteal: r.stealBy === 'mao'
+          });
+        }
+        if (r.stealBy) stealCount += 1;
+      }
+
+      return { chunPts, maoPts, chunItems, maoItems, stealCount, doneEntries };
+    }
+
+    function computeMonthTotals(monthStr) {
+      let chunMonth = 0;
+      let maoMonth = 0;
+      for (let d = 1; d <= 30; d++) {
+        const dt = computeDayTotals(monthStr, d);
+        chunMonth += dt.chunPts;
+        maoMonth += dt.maoPts;
+      }
+      const spentChun = state.redemptions
+        .filter(r => r.who === 'chun')
+        .reduce((acc, r) => acc + r.pts, 0);
+      const spentMao = state.redemptions
+        .filter(r => r.who === 'mao')
+        .reduce((acc, r) => acc + r.pts, 0);
+      const totalSpent = spentChun + spentMao;
+      const familyMonth = chunMonth + maoMonth;
+      const redeemable = Math.min(3000, familyMonth);
+      const centralBank = Math.max(0, familyMonth - 3000);
+
+      return {
+        chunMonth,
+        maoMonth,
+        familyMonth,
+        spentChun,
+        spentMao,
+        totalSpent,
+        chunAvail: Math.max(0, chunMonth - spentChun),
+        maoAvail: Math.max(0, maoMonth - spentMao),
+        redeemable,
+        centralBank
+      };
+    }
+
+    // =========================================================================
+    // 4. INTERACTION HANDLERS FOR TASKS (4 SCORING SCENARIOS)
+    // =========================================================================
+    // Action types:
+    // - 'toggle_owner': Toggle 0/1 for designated owner (chun or mao)
+    // - 'toggle_steal': Toggle 🚀截胡/代劳 for the other partner
+    // - 'step_chun': +1 or -1 for 春春
+    // - 'step_mao': +1 or -1 for 毛毛
+    // - 'step_steal': +1 for 🚀截胡/代劳 partner on multi/duration task
+    function handleTaskAction(taskId, action, delta) {
+      const tasks = getAllTasks();
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      const weekday = getWeekday(state.currentMonth, state.selectedDay);
+      const effMode = getEffectiveMode(task, weekday);
+      const cur = getTaskRecord(state.currentMonth, state.selectedDay, taskId);
+      const next = { ...cur };
+
+      if (action === 'toggle_chun') {
+        next.chunCount = next.chunCount > 0 ? 0 : 1;
+        if (effMode === 'mao' && next.chunCount > 0) {
+          next.maoCount = 0;
+          next.stealBy = 'chun';
+          showToast(`🚀 春春截胡/代劳「${task.name}」+${task.pts}分！`);
+        } else {
+          if (effMode === 'chun') next.maoCount = 0;
+          next.stealBy = null;
+          if (next.chunCount > 0) showToast(`🧑🏻‍💻 春春完成「${task.name}」+${task.pts}分`);
+        }
+      } else if (action === 'toggle_mao') {
+        next.maoCount = next.maoCount > 0 ? 0 : 1;
+        if (effMode === 'chun' && next.maoCount > 0) {
+          next.chunCount = 0;
+          next.stealBy = 'mao';
+          showToast(`🚀 毛毛截胡/代劳「${task.name}」+${task.pts}分！`);
+        } else {
+          if (effMode === 'mao') next.chunCount = 0;
+          next.stealBy = null;
+          if (next.maoCount > 0) showToast(`👩🏻‍🎨 毛毛完成「${task.name}」+${task.pts}分`);
+        }
+      } else if (action === 'step_chun') {
+        next.chunCount = Math.max(0, (next.chunCount || 0) + delta);
+        if (effMode === 'mao' && next.chunCount > 0) {
+          next.stealBy = 'chun';
+          if (delta > 0) showToast(`🚀 春春代劳/截胡「${task.name}」累计 ${next.chunCount}${task.unitLabel} (+${next.chunCount * task.pts}分)`);
+        } else if (delta > 0) {
+          showToast(`🧑🏻‍💻 春春「${task.name}」累计 ${next.chunCount}${task.unitLabel} (+${next.chunCount * task.pts}分)`);
+        }
+        if (next.chunCount === 0 && next.stealBy === 'chun') next.stealBy = null;
+      } else if (action === 'step_mao') {
+        next.maoCount = Math.max(0, (next.maoCount || 0) + delta);
+        if (effMode === 'chun' && next.maoCount > 0) {
+          next.stealBy = 'mao';
+          if (delta > 0) showToast(`🚀 毛毛代劳/截胡「${task.name}」累计 ${next.maoCount}${task.unitLabel} (+${next.maoCount * task.pts}分)`);
+        } else if (delta > 0) {
+          showToast(`👩🏻‍🎨 毛毛「${task.name}」累计 ${next.maoCount}${task.unitLabel} (+${next.maoCount * task.pts}分)`);
+        }
+        if (next.maoCount === 0 && next.stealBy === 'mao') next.stealBy = null;
+      }
+
+      setTaskRecord(state.currentMonth, state.selectedDay, taskId, next);
+    }
+
+    // =========================================================================
+    // 5. RENDERING FUNCTIONS
+    // =========================================================================
+    function renderDashboardAndDayStrip() {
+      const dayTotals = computeDayTotals(state.currentMonth, state.selectedDay);
+      const monthTotals = computeMonthTotals(state.currentMonth);
+      const weekday = getWeekday(state.currentMonth, state.selectedDay);
+      const weekdayName = WEEKDAY_NAMES[weekday];
+
+      // Top cards
+      document.getElementById('stat-chun-today').textContent = dayTotals.chunPts;
+      document.getElementById('stat-mao-today').textContent = dayTotals.maoPts;
+      document.getElementById('stat-chun-progress-label').textContent = `${dayTotals.chunPts} / 50 分`;
+      document.getElementById('stat-mao-progress-label').textContent = `${dayTotals.maoPts} / 50 分`;
+      document.getElementById('stat-chun-bar').style.width = `${Math.min(100, Math.round((dayTotals.chunPts / 50) * 100))}%`;
+      document.getElementById('stat-mao-bar').style.width = `${Math.min(100, Math.round((dayTotals.maoPts / 50) * 100))}%`;
+
+      document.getElementById('stat-chun-month').textContent = monthTotals.chunMonth;
+      document.getElementById('stat-mao-month').textContent = monthTotals.maoMonth;
+      document.getElementById('stat-chun-avail').textContent = monthTotals.chunAvail;
+      document.getElementById('stat-mao-avail').textContent = monthTotals.maoAvail;
+
+      document.getElementById('stat-family-month').textContent = monthTotals.familyMonth;
+      document.getElementById('stat-fund-redeemable').textContent = monthTotals.redeemable;
+      document.getElementById('stat-fund-bar').style.width = `${Math.min(100, Math.round((monthTotals.familyMonth / 3000) * 100))}%`;
+      document.getElementById('stat-spent-month').textContent = monthTotals.totalSpent;
+      document.getElementById('stat-central-bank').textContent = monthTotals.centralBank;
+
+      document.getElementById('stat-selected-date-title').textContent = `${state.currentMonth}-${String(state.selectedDay).padStart(2, '0')} (${weekdayName})`;
+      document.getElementById('stat-steal-count').textContent = `🚀 今日截胡/代劳 ${dayTotals.stealCount} 次`;
+      document.getElementById('current-day-weekday-badge').textContent = `第 ${state.selectedDay} 天 · ${weekdayName}`;
+
+      // Audit status
+      const auditRec = state.audits[state.currentMonth]?.[state.selectedDay] || { chunAuditedByMao: false, maoAuditedByChun: false };
+      const chunBadge = document.getElementById('chun-audit-badge');
+      const maoBadge = document.getElementById('mao-audit-badge');
+      const btnAuditChun = document.getElementById('btn-audit-chun');
+      const btnAuditMao = document.getElementById('btn-audit-mao');
+
+      if (auditRec.chunAuditedByMao) {
+        chunBadge.textContent = '✅ 毛毛已审签';
+        chunBadge.className = 'ml-1.5 text-[11px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        btnAuditChun.innerHTML = '<span>✅ 毛毛已审春春 (点击撤销)</span>';
+        btnAuditChun.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1 bg-emerald-600/30 text-emerald-200 border-emerald-500/50';
+      } else {
+        chunBadge.textContent = '⏳ 待毛毛签字';
+        chunBadge.className = 'ml-1.5 text-[11px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-300';
+        btnAuditChun.innerHTML = '<span>✍️ 毛毛签字审春春</span>';
+        btnAuditChun.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1 bg-slate-700/80 hover:bg-pink-600/80 text-slate-200 border-slate-600';
+      }
+
+      if (auditRec.maoAuditedByChun) {
+        maoBadge.textContent = '✅ 春春已审签';
+        maoBadge.className = 'ml-1.5 text-[11px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        btnAuditMao.innerHTML = '<span>✅ 春春已审毛毛 (点击撤销)</span>';
+        btnAuditMao.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1 bg-emerald-600/30 text-emerald-200 border-emerald-500/50';
+      } else {
+        maoBadge.textContent = '⏳ 待春春签字';
+        maoBadge.className = 'ml-1.5 text-[11px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-300';
+        btnAuditMao.innerHTML = '<span>✍️ 春春签字审毛毛</span>';
+        btnAuditMao.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1 bg-slate-700/80 hover:bg-indigo-600/80 text-slate-200 border-slate-600';
+      }
+
+      // Render 30-day horizontal strip
+      const strip = document.getElementById('day-strip-container');
+      let stripHtml = '';
+      for (let d = 1; d <= 30; d++) {
+        const dt = computeDayTotals(state.currentMonth, d);
+        const wd = getWeekday(state.currentMonth, d);
+        const wdShort = ['日', '一', '二', '三', '四', '五', '六'][wd];
+        const isSelected = d === state.selectedDay;
+        const hasActivity = dt.chunPts > 0 || dt.maoPts > 0;
+
+        stripHtml += `
+          <button type="button" data-day="${d}" class="day-pill-btn shrink-0 w-16 rounded-xl p-1.5 border text-center transition-all ${
+            isSelected
+              ? 'day-pill-active border-indigo-600'
+              : hasActivity
+                ? 'bg-slate-50 border-slate-300 hover:border-indigo-400 text-slate-800'
+                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-500'
+          }">
+            <div class="text-[10px] font-medium ${isSelected ? 'text-indigo-100' : 'text-slate-400'}">周${wdShort}</div>
+            <div class="text-xs font-bold leading-tight mt-0.5">${d}日</div>
+            <div class="mt-1 flex items-center justify-center gap-1 text-[10px] font-semibold">
+              <span class="${isSelected ? 'text-white' : 'text-indigo-600'}">${dt.chunPts}</span>
+              <span class="${isSelected ? 'text-indigo-200' : 'text-slate-300'}">/</span>
+              <span class="${isSelected ? 'text-pink-200' : 'text-pink-600'}">${dt.maoPts}</span>
+            </div>
+          </button>
+        `;
+      }
+      strip.innerHTML = stripHtml;
+
+      // Attach day click listeners
+      strip.querySelectorAll('.day-pill-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.selectedDay = Number(btn.getAttribute('data-day'));
+          saveState();
+          renderAll();
+        });
+      });
+    }
+
+    // Build interactive controls for each task row according to its mode and countType
+    function buildTaskControlsHtml(task, rec, weekday) {
+      const effMode = getEffectiveMode(task, weekday);
+      const cCount = rec.chunCount || 0;
+      const mCount = rec.maoCount || 0;
+      const cPts = cCount * task.pts;
+      const mPts = mCount * task.pts;
+
+      // Helper for duration text (e.g., 毛毛学习新领域: 3次 = 6小时 = +15分)
+      const formatCountDetail = (count) => {
+        if (task.countType === 'duration' && task.hoursPerUnit) {
+          const totalHours = count * task.hoursPerUnit;
+          return `${count}次 (${totalHours}h) · +${count * task.pts}分`;
+        }
+        return `${count}${task.unitLabel || '次'} · +${count * task.pts}分`;
+      };
+
+      // CASE A: 双方各自负责 / 共同遵守 (mode === 'both')
+      if (effMode === 'both') {
+        if (task.countType === 'once') {
+          return `
+            <div class="flex items-center gap-2 flex-wrap justify-end">
+              <button type="button" data-task="${task.id}" data-action="toggle_chun" class="task-act-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+                cCount > 0
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                  : 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'
+              }">
+                <span>${cCount > 0 ? '✅' : '⭕'} 春春完成</span>
+                <span class="text-[11px] ${cCount > 0 ? 'text-indigo-100' : 'text-indigo-500'}">+${task.pts}分</span>
+              </button>
+
+              <button type="button" data-task="${task.id}" data-action="toggle_mao" class="task-act-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+                mCount > 0
+                  ? 'bg-pink-600 text-white border-pink-600 shadow-xs'
+                  : 'bg-white text-pink-700 border-pink-200 hover:bg-pink-50'
+              }">
+                <span>${mCount > 0 ? '✅' : '⭕'} 毛毛完成</span>
+                <span class="text-[11px] ${mCount > 0 ? 'text-pink-100' : 'text-pink-500'}">+${task.pts}分</span>
+              </button>
+            </div>
+          `;
+        } else {
+          // Multi-count or Duration for BOTH (e.g., 口吐莲花, 念佛经, 学习职业路线0.5h)
+          const stepLabel = task.countType === 'duration' ? `+1 (${task.unitLabel})` : `+1${task.unitLabel || '次'}`;
+          return `
+            <div class="flex items-center gap-2 flex-wrap justify-end">
+              <!-- Chunchun Counter -->
+              <div class="flex items-center rounded-xl border ${cCount > 0 ? 'border-indigo-400 bg-indigo-50/70' : 'border-slate-200 bg-slate-50'} p-1 gap-1">
+                <span class="text-[11px] font-bold text-indigo-700 px-1.5">🧑🏻‍💻春春</span>
+                <button type="button" data-task="${task.id}" data-action="step_chun" data-delta="-1" class="task-act-btn w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold flex items-center justify-center" ${cCount === 0 ? 'disabled' : ''}>-</button>
+                <span class="text-xs font-bold text-indigo-800 px-1.5 min-w-[64px] text-center">${cCount > 0 ? formatCountDetail(cCount) : '0次'}</span>
+                <button type="button" data-task="${task.id}" data-action="step_chun" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold flex items-center justify-center">${stepLabel}</button>
+              </div>
+
+              <!-- Maomao Counter -->
+              <div class="flex items-center rounded-xl border ${mCount > 0 ? 'border-pink-400 bg-pink-50/70' : 'border-slate-200 bg-slate-50'} p-1 gap-1">
+                <span class="text-[11px] font-bold text-pink-700 px-1.5">👩🏻‍🎨毛毛</span>
+                <button type="button" data-task="${task.id}" data-action="step_mao" data-delta="-1" class="task-act-btn w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold flex items-center justify-center" ${mCount === 0 ? 'disabled' : ''}>-</button>
+                <span class="text-xs font-bold text-pink-800 px-1.5 min-w-[64px] text-center">${mCount > 0 ? formatCountDetail(mCount) : '0次'}</span>
+                <button type="button" data-task="${task.id}" data-action="step_mao" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-pink-600 hover:bg-pink-700 text-white text-[11px] font-semibold flex items-center justify-center">${stepLabel}</button>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      // CASE B: 春春负责/牵头 (effMode === 'chun') OR 毛毛负责/牵头/专属 (effMode === 'mao')
+      // Supports Primary Owner Completion + 🚀截胡/代劳 by the other partner!
+      const isChunOwner = effMode === 'chun';
+      const ownerName = isChunOwner ? '春春' : '毛毛';
+      const stealerName = isChunOwner ? '毛毛' : '春春';
+      const ownerCount = isChunOwner ? cCount : mCount;
+      const stealerCount = isChunOwner ? mCount : cCount;
+      const ownerToggleAct = isChunOwner ? 'toggle_chun' : 'toggle_mao';
+      const stealerToggleAct = isChunOwner ? 'toggle_mao' : 'toggle_chun';
+      const ownerStepAct = isChunOwner ? 'step_chun' : 'step_mao';
+      const stealerStepAct = isChunOwner ? 'step_mao' : 'step_chun';
+
+      if (task.countType === 'once') {
+        const ownerActiveClass = isChunOwner
+          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+          : 'bg-pink-600 text-white border-pink-600 shadow-xs';
+        const ownerIdleClass = isChunOwner
+          ? 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'
+          : 'bg-white text-pink-700 border-pink-200 hover:bg-pink-50';
+
+        return `
+          <div class="flex items-center gap-2 flex-wrap justify-end">
+            <!-- Primary Designated Owner Button -->
+            <button type="button" data-task="${task.id}" data-action="${ownerToggleAct}" class="task-act-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+              ownerCount > 0 ? ownerActiveClass : ownerIdleClass
+            }">
+              <span>${ownerCount > 0 ? '✅' : '⭕'} ${ownerName}完成 (本职)</span>
+              <span class="text-[11px] opacity-90">+${task.pts}分</span>
+            </button>
+
+            <!-- Steal / Substitute Button -->
+            <button type="button" data-task="${task.id}" data-action="${stealerToggleAct}" class="task-act-btn px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1 ${
+              stealerCount > 0
+                ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                : 'bg-amber-50/70 text-amber-800 border-amber-200 hover:bg-amber-100'
+            }" title="对方没发起或代劳完成，积分全额划归${stealerName}">
+              <span>🚀 ${stealerCount > 0 ? `${stealerName}已截胡/代劳 (+${task.pts}分)` : `${stealerName}截胡/代劳`}</span>
+            </button>
+          </div>
+        `;
+      } else {
+        // Multi-count or Duration task with a primary owner (e.g., 毛毛学习新领域 5分/2h, 铲猫砂 2分/次, 做饭 10分/次)
+        const stepLabel = task.countType === 'duration' ? `+1 (${task.unitLabel})` : `+1${task.unitLabel || '次'}`;
+        const ownerColor = isChunOwner ? 'indigo' : 'pink';
+
+        return `
+          <div class="flex items-center gap-2 flex-wrap justify-end">
+            <!-- Primary Owner Stepper -->
+            <div class="flex items-center rounded-xl border ${ownerCount > 0 ? `border-${ownerColor}-400 bg-${ownerColor}-50/70` : 'border-slate-200 bg-slate-50'} p-1 gap-1">
+              <span class="text-[11px] font-bold text-${ownerColor}-700 px-1.5">${ownerName}(本职)</span>
+              <button type="button" data-task="${task.id}" data-action="${ownerStepAct}" data-delta="-1" class="task-act-btn w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold flex items-center justify-center" ${ownerCount === 0 ? 'disabled' : ''}>-</button>
+              <span class="text-xs font-bold text-${ownerColor}-800 px-1.5 min-w-[72px] text-center">${ownerCount > 0 ? formatCountDetail(ownerCount) : '0次'}</span>
+              <button type="button" data-task="${task.id}" data-action="${ownerStepAct}" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-${ownerColor}-600 hover:bg-${ownerColor}-700 text-white text-[11px] font-semibold flex items-center justify-center">${stepLabel}</button>
+            </div>
+
+            <!-- Stealer / Substitute Stepper -->
+            <div class="flex items-center rounded-xl border ${stealerCount > 0 ? 'border-amber-400 bg-amber-50' : 'border-amber-200/80 bg-amber-50/30'} p-1 gap-1" title="由${stealerName}主动代劳或截胡完成">
+              <span class="text-[11px] font-bold text-amber-800 px-1">🚀${stealerName}代劳</span>
+              ${stealerCount > 0 ? `
+                <button type="button" data-task="${task.id}" data-action="${stealerStepAct}" data-delta="-1" class="task-act-btn w-5 h-6 rounded-lg bg-white border border-amber-300 text-amber-800 text-xs font-bold flex items-center justify-center">-</button>
+                <span class="text-xs font-bold text-amber-900 px-1">${formatCountDetail(stealerCount)}</span>
+              ` : ''}
+              <button type="button" data-task="${task.id}" data-action="${stealerStepAct}" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-semibold flex items-center justify-center">+1截胡</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function renderDailyView() {
+      const container = document.getElementById('tasks-list-container');
+      const weekday = getWeekday(state.currentMonth, state.selectedDay);
+      const weekdayName = WEEKDAY_NAMES[weekday];
+      const allTasks = getAllTasks();
+
+      // Filter tasks
+      const filteredTasks = allTasks.filter(task => {
+        if (state.catFilter !== 'all' && task.cat !== state.catFilter) return false;
+
+        const effMode = getEffectiveMode(task, weekday);
+        if (state.ownerFilter !== 'all' && effMode !== state.ownerFilter) return false;
+
+        const rec = getTaskRecord(state.currentMonth, state.selectedDay, task.id);
+        const isDone = (rec.chunCount || 0) > 0 || (rec.maoCount || 0) > 0;
+        const isRec = isTaskRecommendedForDay(task, weekday);
+
+        if (state.scheduleFilter === 'recommended' && !isRec) return false;
+        if (state.scheduleFilter === 'done' && !isDone) return false;
+        if (state.scheduleFilter === 'todo' && isDone) return false;
+
+        if (state.searchQuery.trim() !== '') {
+          const q = state.searchQuery.trim().toLowerCase();
+          const matchName = task.name.toLowerCase().includes(q);
+          const matchRole = task.roleText.toLowerCase().includes(q);
+          const matchFreq = task.freqText.toLowerCase().includes(q);
+          if (!matchName && !matchRole && !matchFreq) return false;
+        }
+        return true;
+      });
+
+      // Group by category
+      const catsToShow = state.catFilter === 'all' ? ['pet', 'chore', 'growth', 'spirit'] : [state.catFilter];
+      let html = '';
+
+      for (const catKey of catsToShow) {
+        const catTasks = filteredTasks.filter(t => t.cat === catKey);
+        if (catTasks.length === 0) continue;
+        const meta = CATEGORY_META[catKey];
+
+        html += `
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+            <div class="bg-slate-50/90 border-b border-slate-200 px-4 py-3 flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900">${meta.title}</h3>
+                <p class="text-xs text-slate-500">${meta.subtitle}</p>
+              </div>
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-full border ${meta.badgeClass}">
+                显示 ${catTasks.length} 项
+              </span>
+            </div>
+            <div class="divide-y divide-slate-100">
+        `;
+
+        for (const task of catTasks) {
+          const rec = getTaskRecord(state.currentMonth, state.selectedDay, task.id);
+          const isDone = (rec.chunCount || 0) > 0 || (rec.maoCount || 0) > 0;
+          const isRec = isTaskRecommendedForDay(task, weekday);
+          const effMode = getEffectiveMode(task, weekday);
+
+          // Role badge styling
+          let roleBadge = '';
+          if (effMode === 'chun') {
+            roleBadge = `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md chun-badge">🧑🏻‍💻 ${task.roleText}</span>`;
+          } else if (effMode === 'mao') {
+            roleBadge = `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md mao-badge">👩🏻‍🎨 ${task.roleText}</span>`;
+          } else {
+            roleBadge = `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">👥 ${task.roleText}</span>`;
+          }
+
+          // Frequency & Today Recommendation Tag
+          const recBadge = Array.isArray(task.days) && task.days.length < 7 && isRec
+            ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-indigo-600 text-white">📅 今日(${weekdayName})排期应做</span>`
+            : `<span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">🕒 ${task.freqText}</span>`;
+
+          // Special Type Tag
+          let typeBadge = '';
+          if (task.countType === 'duration') {
+            typeBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">⏱️ 按${task.unitLabel}累加 (${task.unitText})</span>`;
+          } else if (task.countType === 'multi') {
+            typeBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200">🔢 可多次计次 (${task.unitText})</span>`;
+          } else {
+            typeBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">${task.unitText}</span>`;
+          }
+
+          html += `
+            <div class="p-3.5 sm:px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
+              isDone ? 'bg-emerald-50/25' : 'hover:bg-slate-50/80'
+            }">
+              <div class="space-y-1.5 pr-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-bold ${isDone ? 'text-slate-900' : 'text-slate-800'}">${task.name}</span>
+                  ${typeBadge}
+                  ${rec.stealBy ? `<span class="text-[11px] font-bold px-2 py-0.5 rounded-md steal-badge">🚀 ${rec.stealBy === 'chun' ? '春春' : '毛毛'}截胡/代劳得分</span>` : ''}
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  ${roleBadge}
+                  ${recBadge}
+                </div>
+              </div>
+              <div class="shrink-0">
+                ${buildTaskControlsHtml(task, rec, weekday)}
+              </div>
+            </div>
+          `;
+        }
+
+        html += `
+            </div>
+          </div>
+        `;
+      }
+
+      if (!html) {
+        html = `
+          <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center space-y-2">
+            <div class="text-3xl">🔍</div>
+            <div class="text-sm font-bold text-slate-800">没有找到符合当前筛选条件的项目</div>
+            <p class="text-xs text-slate-500">请尝试切换回“全部项目列选 (75项)”或清空搜索框</p>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+
+      // Bind task action buttons
+      container.querySelectorAll('.task-act-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const taskId = btn.getAttribute('data-task');
+          const action = btn.getAttribute('data-action');
+          const delta = Number(btn.getAttribute('data-delta') || 0);
+          handleTaskAction(taskId, action, delta);
+        });
+      });
+
+      // Render Right Sidebar Daily Scorecard
+      renderDailySidebar();
+    }
+
+    function renderDailySidebar() {
+      const weekday = getWeekday(state.currentMonth, state.selectedDay);
+      const weekdayName = WEEKDAY_NAMES[weekday];
+      const dayTotals = computeDayTotals(state.currentMonth, state.selectedDay);
+      const allTasks = getAllTasks();
+
+      document.getElementById('sidebar-day-title').textContent = `第 ${state.selectedDay} 天 (${weekdayName}) · 成绩单`;
+      document.getElementById('sidebar-chun-pts').textContent = dayTotals.chunPts;
+      document.getElementById('sidebar-mao-pts').textContent = dayTotals.maoPts;
+      document.getElementById('sidebar-chun-count').textContent = `${dayTotals.chunItems}项`;
+      document.getElementById('sidebar-mao-count').textContent = `${dayTotals.maoItems}项`;
+
+      // Done entries
+      const doneListEl = document.getElementById('sidebar-done-list');
+      document.getElementById('side-done-num').textContent = dayTotals.doneEntries.length;
+
+      if (dayTotals.doneEntries.length === 0) {
+        doneListEl.innerHTML = `
+          <div class="text-center py-8 text-xs text-slate-400">
+            今日暂无打卡记录，在左侧勾选或点击 +1 即可实时计分！
+          </div>
+        `;
+      } else {
+        doneListEl.innerHTML = dayTotals.doneEntries.map(entry => {
+          const isChun = entry.who === 'chun';
+          const whoLabel = isChun ? '🧑🏻‍💻 春春' : '👩🏻‍🎨 毛毛';
+          const badgeCls = isChun ? 'chun-badge' : 'mao-badge';
+          const detailText = entry.task.countType === 'duration' && entry.task.hoursPerUnit
+            ? `${entry.count}次 (共${entry.count * entry.task.hoursPerUnit}小时)`
+            : `${entry.count}${entry.task.unitLabel || '次'}`;
+          return `
+            <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between gap-2 text-xs">
+              <div class="space-y-0.5">
+                <div class="font-semibold text-slate-800 flex items-center gap-1.5 flex-wrap">
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeCls}">${whoLabel}</span>
+                  <span>${entry.task.name}</span>
+                  ${entry.isSteal ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold steal-badge">🚀截胡/代劳</span>' : ''}
+                </div>
+                <div class="text-[11px] text-slate-500">完成数量：${detailText}</div>
+              </div>
+              <div class="font-extrabold text-sm ${isChun ? 'text-indigo-600' : 'text-pink-600'} shrink-0">
+                +${entry.pts}分
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Todo recommended entries for today
+      const todoTasks = allTasks.filter(t => {
+        const rec = getTaskRecord(state.currentMonth, state.selectedDay, t.id);
+        const isDone = (rec.chunCount || 0) > 0 || (rec.maoCount || 0) > 0;
+        return !isDone && Array.isArray(t.days) && t.days.includes(weekday);
+      });
+
+      document.getElementById('side-todo-num').textContent = todoTasks.length;
+      const todoListEl = document.getElementById('sidebar-todo-list');
+
+      if (todoTasks.length === 0) {
+        todoListEl.innerHTML = `
+          <div class="text-center py-8 text-xs text-emerald-600 font-semibold">
+            🎉 今日所有排期必做项目已全部完成！
+          </div>
+        `;
+      } else {
+        todoListEl.innerHTML = todoTasks.map(t => {
+          const effMode = getEffectiveMode(t, weekday);
+          const ownerTag = effMode === 'chun' ? '🧑🏻‍💻春春' : effMode === 'mao' ? '👩🏻‍🎨毛毛' : '👥各自/共同';
+          return `
+            <div class="p-2.5 rounded-xl border border-slate-200 bg-white flex items-center justify-between gap-2 text-xs">
+              <div>
+                <div class="font-semibold text-slate-800">${t.name}</div>
+                <div class="text-[11px] text-slate-500">${ownerTag} · ${t.unitText} · ${t.freqText}</div>
+              </div>
+              <button type="button" data-quick-task="${t.id}" class="quick-todo-btn px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] shrink-0">
+                去打卡
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        todoListEl.querySelectorAll('.quick-todo-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tid = btn.getAttribute('data-quick-task');
+            const task = allTasks.find(x => x.id === tid);
+            if (!task) return;
+            state.searchQuery = task.name;
+            document.getElementById('search-input').value = task.name;
+            document.getElementById('clear-search-btn').classList.remove('hidden');
+            renderDailyView();
+          });
+        });
+      }
+    }
+
+    // =========================================================================
+    // 6. VIEW 2: 30-DAY FULL MATRIX RENDERING
+    // =========================================================================
+    function renderMatrixView() {
+      const summaryHeader = document.getElementById('matrix-summary-header');
+      const summaryBody = document.getElementById('matrix-summary-body');
+      const tasksHeader = document.getElementById('matrix-tasks-header');
+      const tasksBody = document.getElementById('matrix-tasks-body');
+
+      // 1. Summary Table Header (Day 1 .. Day 30)
+      let sHeadHtml = `<th class="p-2.5 font-bold bg-slate-100 sticky left-0 z-10 border-r border-slate-200 min-w-[120px]">角色 / 日期</th>`;
+      for (let d = 1; d <= 30; d++) {
+        const wd = ['日','一','二','三','四','五','六'][getWeekday(state.currentMonth, d)];
+        sHeadHtml += `
+          <th class="p-2 text-center font-semibold min-w-[46px] border-r border-slate-200/60 cursor-pointer hover:bg-indigo-50" data-jump-day="${d}">
+            <div>${d}日</div>
+            <div class="text-[10px] text-slate-400 font-normal">周${wd}</div>
+          </th>
+        `;
+      }
+      sHeadHtml += `<th class="p-2.5 text-center font-bold bg-slate-100 min-w-[70px]">月度总计</th>`;
+      summaryHeader.innerHTML = sHeadHtml;
+
+      let chunRowHtml = `<td class="p-2.5 font-bold text-indigo-700 bg-white sticky left-0 z-10 border-r border-slate-200">🧑🏻‍💻 春春当日积分</td>`;
+      let maoRowHtml = `<td class="p-2.5 font-bold text-pink-700 bg-white sticky left-0 z-10 border-r border-slate-200">👩🏻‍🎨 毛毛当日积分</td>`;
+      let totalChun = 0;
+      let totalMao = 0;
+
+      for (let d = 1; d <= 30; d++) {
+        const dt = computeDayTotals(state.currentMonth, d);
+        totalChun += dt.chunPts;
+        totalMao += dt.maoPts;
+        chunRowHtml += `<td class="p-2 text-center font-bold ${dt.chunPts > 0 ? 'text-indigo-600 bg-indigo-50/40' : 'text-slate-300'} border-r border-slate-100 cursor-pointer hover:bg-indigo-100/50" data-jump-day="${d}">${dt.chunPts}</td>`;
+        maoRowHtml += `<td class="p-2 text-center font-bold ${dt.maoPts > 0 ? 'text-pink-600 bg-pink-50/40' : 'text-slate-300'} border-r border-slate-100 cursor-pointer hover:bg-pink-100/50" data-jump-day="${d}">${dt.maoPts}</td>`;
+      }
+      chunRowHtml += `<td class="p-2.5 text-center font-extrabold text-indigo-700 bg-indigo-50">${totalChun}分</td>`;
+      maoRowHtml += `<td class="p-2.5 text-center font-extrabold text-pink-700 bg-pink-50">${totalMao}分</td>`;
+
+      summaryBody.innerHTML = `
+        <tr class="border-b border-slate-200">${chunRowHtml}</tr>
+        <tr>${maoRowHtml}</tr>
+      `;
+
+      // 2. Per-Task 30-Day Matrix
+      let tHeadHtml = `
+        <th class="p-2.5 font-bold bg-slate-100 sticky left-0 z-20 border-r border-slate-200 min-w-[210px]">考核项目名称 (积分标准)</th>
+      `;
+      for (let d = 1; d <= 30; d++) {
+        tHeadHtml += `<th class="p-1.5 text-center font-semibold min-w-[38px] border-r border-slate-200/60">${d}</th>`;
+      }
+      tasksHeader.innerHTML = tHeadHtml;
+
+      const allTasks = getAllTasks().filter(t => state.matrixCatFilter === 'all' || t.cat === state.matrixCatFilter);
+      let tBodyHtml = '';
+
+      for (const task of allTasks) {
+        tBodyHtml += `<tr class="hover:bg-slate-50">`;
+        tBodyHtml += `
+          <td class="p-2 font-medium text-slate-800 bg-white sticky left-0 z-10 border-r border-slate-200">
+            <div class="truncate max-w-[200px]" title="${task.name}">${task.name}</div>
+            <div class="text-[10px] text-slate-400">${task.unitText} · ${task.roleText}</div>
+          </td>
+        `;
+        for (let d = 1; d <= 30; d++) {
+          const rec = getTaskRecord(state.currentMonth, d, task.id);
+          const c = rec.chunCount || 0;
+          const m = rec.maoCount || 0;
+          let cellContent = '<span class="text-slate-200">·</span>';
+          let cellBg = '';
+
+          if (c > 0 && m > 0) {
+            cellContent = `<span class="text-[10px] font-bold text-emerald-700">双${c + m}</span>`;
+            cellBg = 'bg-emerald-50';
+          } else if (c > 0) {
+            cellContent = `<span class="text-[10px] font-bold ${rec.stealBy === 'chun' ? 'text-amber-700' : 'text-indigo-600'}">${rec.stealBy === 'chun' ? '🚀' : ''}春${c > 1 ? c : ''}</span>`;
+            cellBg = rec.stealBy === 'chun' ? 'bg-amber-50' : 'bg-indigo-50/60';
+          } else if (m > 0) {
+            cellContent = `<span class="text-[10px] font-bold ${rec.stealBy === 'mao' ? 'text-amber-700' : 'text-pink-600'}">${rec.stealBy === 'mao' ? '🚀' : ''}毛${m > 1 ? m : ''}</span>`;
+            cellBg = rec.stealBy === 'mao' ? 'bg-amber-50' : 'bg-pink-50/60';
+          }
+
+          tBodyHtml += `
+            <td class="p-1 text-center border-r border-slate-100 cursor-pointer hover:bg-slate-100 ${cellBg}" data-jump-day="${d}" title="第${d}天 · 点击跳转编辑">
+              ${cellContent}
+            </td>
+          `;
+        }
+        tBodyHtml += `</tr>`;
+      }
+      tasksBody.innerHTML = tBodyHtml;
+
+      // Jump to day on click
+      document.getElementById('view-matrix').querySelectorAll('[data-jump-day]').forEach(el => {
+        el.addEventListener('click', () => {
+          state.selectedDay = Number(el.getAttribute('data-jump-day'));
+          switchView('daily');
+        });
+      });
+    }
+
+    // =========================================================================
+    // 7. VIEW 3: WISH SHOP & REDEMPTION
+    // =========================================================================
+    function renderShopView() {
+      const monthTotals = computeMonthTotals(state.currentMonth);
+      document.getElementById('shop-chun-avail').textContent = monthTotals.chunAvail;
+      document.getElementById('shop-mao-avail').textContent = monthTotals.maoAvail;
+
+      const groups = [...new Set(SHOP_ITEMS.map(i => i.group))];
+      const container = document.getElementById('shop-items-container');
+      let html = '';
+
+      for (const grp of groups) {
+        const items = SHOP_ITEMS.filter(i => i.group === grp);
+        html += `
+          <div class="space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-1.5">${grp}</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        `;
+        for (const item of items) {
+          html += `
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between gap-3">
+              <div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-sm font-bold text-slate-900">${item.name}</span>
+                  <span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md">${item.fixed ? `${item.defaultPts} 积分` : '按实际价格核销'}</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">${item.desc}</p>
+              </div>
+              <div class="flex items-center gap-2 pt-1">
+                <input id="price-${item.id}" type="number" min="1" value="${item.defaultPts}" ${item.fixed ? 'readonly' : ''} class="w-20 text-xs font-bold text-slate-800 bg-white border border-slate-300 rounded-lg px-2 py-1.5" />
+                <span class="text-xs text-slate-500">分</span>
+                <div class="ml-auto flex items-center gap-1.5">
+                  ${item.target !== 'mao' ? `
+                    <button type="button" data-redeem-id="${item.id}" data-who="chun" class="redeem-btn px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors">
+                      春春兑换
+                    </button>
+                  ` : ''}
+                  ${item.target !== 'chun' ? `
+                    <button type="button" data-redeem-id="${item.id}" data-who="mao" class="redeem-btn px-2.5 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-700 text-white text-xs font-semibold transition-colors">
+                      毛毛兑换
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        html += `</div></div>`;
+      }
+      container.innerHTML = html;
+
+      container.querySelectorAll('.redeem-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const itemId = btn.getAttribute('data-redeem-id');
+          const who = btn.getAttribute('data-who');
+          const item = SHOP_ITEMS.find(x => x.id === itemId);
+          const priceInput = document.getElementById(`price-${itemId}`);
+          const pts = Math.max(1, Number(priceInput?.value || item.defaultPts));
+          handleRedeem(who, item.name, pts);
+        });
+      });
+
+      renderRedemptionHistory();
+    }
+
+    function handleRedeem(who, itemName, pts) {
+      const monthTotals = computeMonthTotals(state.currentMonth);
+      const avail = who === 'chun' ? monthTotals.chunAvail : monthTotals.maoAvail;
+      const whoName = who === 'chun' ? '春春' : '毛毛';
+
+      if (avail < pts) {
+        showToast(`⚠️ ${whoName}当前可用积分不足（需 ${pts} 分，当前可用 ${avail} 分）`);
+        return;
+      }
+
+      state.redemptions.unshift({
+        id: 'red_' + Date.now(),
+        dateStr: `${state.currentMonth}-${String(state.selectedDay).padStart(2, '0')}`,
+        who,
+        itemName,
+        pts
+      });
+      saveState();
+      renderAll();
+      showToast(`🎉 ${whoName}成功兑换「${itemName}」，核销 ${pts} 积分！`);
+    }
+
+    function renderRedemptionHistory() {
+      const listEl = document.getElementById('shop-history-list');
+      if (!state.redemptions || state.redemptions.length === 0) {
+        listEl.innerHTML = `<div class="text-xs text-slate-400 text-center py-6">暂无积分消费记录</div>`;
+        return;
+      }
+      listEl.innerHTML = state.redemptions.map(r => `
+        <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2 text-xs">
+          <div>
+            <div class="font-semibold text-slate-800">
+              <span class="${r.who === 'chun' ? 'text-indigo-600' : 'text-pink-600'} font-bold">${r.who === 'chun' ? '🧑🏻‍💻春春' : '👩🏻‍🎨毛毛'}</span>
+              兑换「${r.itemName}」
+            </div>
+            <div class="text-[11px] text-slate-400">${r.dateStr}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-rose-600">-${r.pts}分</span>
+            <button type="button" data-del-redeem="${r.id}" class="del-redeem-btn text-slate-400 hover:text-rose-600 text-xs" title="撤销该笔兑换">✕</button>
+          </div>
+        </div>
+      `).join('');
+
+      listEl.querySelectorAll('.del-redeem-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const rid = btn.getAttribute('data-del-redeem');
+          state.redemptions = state.redemptions.filter(x => x.id !== rid);
+          saveState();
+          renderAll();
+          showToast('已撤销该笔积分兑换并退回余额');
+        });
+      });
+    }
+
+    // =========================================================================
+    // 8. NAVIGATION & EVENT BINDINGS
+    // =========================================================================
+    // =========================================================================
+    // SMART DUAL-PHONE MERGE ENGINE & CLOUD ROOM SYNC
+    // =========================================================================
+    function mergeRemotePayload(remote) {
+      if (!remote || typeof remote !== 'object') return 0;
+      let mergedChanges = 0;
+
+      // 1. Merge records per month -> day -> taskId
+      if (remote.records && typeof remote.records === 'object') {
+        for (const [mKey, daysObj] of Object.entries(remote.records)) {
+          if (!state.records[mKey]) state.records[mKey] = {};
+          for (const [dKey, tasksObj] of Object.entries(daysObj || {})) {
+            if (!state.records[mKey][dKey]) state.records[mKey][dKey] = {};
+            for (const [tId, rRec] of Object.entries(tasksObj || {})) {
+              const lRec = state.records[mKey][dKey][tId];
+              if (!lRec) {
+                state.records[mKey][dKey][tId] = { ...rRec };
+                mergedChanges++;
+              } else {
+                const lTs = lRec.updatedAt || 0;
+                const rTs = rRec.updatedAt || 0;
+                // If both have timestamps, take the newer one; if timestamps are missing or equal, take max of each person's count so Maomao at home + Chunchun at work both keep their points!
+                if (rTs > lTs) {
+                  // Even if remote is newer overall, if one person only updated their own side, preserve non-zero counts from the other partner if not a steal overwrite
+                  const mergedChun = rRec.stealBy ? rRec.chunCount : Math.max(lRec.chunCount || 0, rRec.chunCount || 0);
+                  const mergedMao = rRec.stealBy ? rRec.maoCount : Math.max(lRec.maoCount || 0, rRec.maoCount || 0);
+                  state.records[mKey][dKey][tId] = {
+                    chunCount: rRec.updatedAt ? rRec.chunCount : mergedChun,
+                    maoCount: rRec.updatedAt ? rRec.maoCount : mergedMao,
+                    stealBy: rRec.stealBy || lRec.stealBy || null,
+                    updatedAt: Math.max(lTs, rTs)
+                  };
+                  mergedChanges++;
+                } else if (rTs === lTs) {
+                  const newC = Math.max(lRec.chunCount || 0, rRec.chunCount || 0);
+                  const newM = Math.max(lRec.maoCount || 0, rRec.maoCount || 0);
+                  if (newC !== (lRec.chunCount || 0) || newM !== (lRec.maoCount || 0)) {
+                    state.records[mKey][dKey][tId] = {
+                      chunCount: newC,
+                      maoCount: newM,
+                      stealBy: rRec.stealBy || lRec.stealBy || null,
+                      updatedAt: Date.now()
+                    };
+                    mergedChanges++;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // 2. Merge audits
+      if (remote.audits && typeof remote.audits === 'object') {
+        for (const [mKey, daysObj] of Object.entries(remote.audits)) {
+          if (!state.audits[mKey]) state.audits[mKey] = {};
+          for (const [dKey, aRec] of Object.entries(daysObj || {})) {
+            const curA = state.audits[mKey][dKey] || { chunAuditedByMao: false, maoAuditedByChun: false };
+            state.audits[mKey][dKey] = {
+              chunAuditedByMao: Boolean(curA.chunAuditedByMao || aRec.chunAuditedByMao),
+              maoAuditedByChun: Boolean(curA.maoAuditedByChun || aRec.maoAuditedByChun)
+            };
+          }
+        }
+      }
+
+      // 3. Merge customTasks by id
+      if (Array.isArray(remote.customTasks)) {
+        const existingIds = new Set((state.customTasks || []).map(t => t.id));
+        for (const ct of remote.customTasks) {
+          if (ct && ct.id && !existingIds.has(ct.id)) {
+            state.customTasks.push(ct);
+            mergedChanges++;
+          }
+        }
+      }
+
+      // 4. Merge redemptions by id
+      if (Array.isArray(remote.redemptions)) {
+        const existingRIds = new Set((state.redemptions || []).map(r => r.id));
+        for (const r of remote.redemptions) {
+          if (r && r.id && !existingRIds.has(r.id)) {
+            state.redemptions.push(r);
+            mergedChanges++;
+          }
+        }
+      }
+
+      saveState();
+      renderAll();
+      return mergedChanges;
+    }
+
+    function getSyncPayload() {
+      return {
+        v: 1,
+        ts: Date.now(),
+        by: state.deviceRole,
+        records: state.records,
+        audits: state.audits,
+        customTasks: state.customTasks,
+        redemptions: state.redemptions
+      };
+    }
+
+    // Cloud Room Sync using public KV store (keyvalue.immanuel.co / npoint fallback)
+    async function syncWithCloudRoom(showFeedback = true) {
+      const roomInput = document.getElementById('cloud-room-input');
+      const roomId = (roomInput ? roomInput.value.trim() : state.cloudRoomId).replace(/[^a-zA-Z0-9_-]/g, '') || 'maochun2026';
+      state.cloudRoomId = roomId;
+      saveState();
+
+      const logEl = document.getElementById('cloud-sync-log');
+      const badgeEl = document.getElementById('cloud-room-badge');
+      if (logEl && showFeedback) {
+        logEl.textContent = `🔄 正在连接云端房间 [${roomId}] 拉取并合并毛毛与春春的最新积分...`;
+      }
+
+      try {
+        // 1. Fetch existing room data
+        const getUrl = `https://keyvalue.immanuel.co/api/KeyVal/GetValue/mc_family_v1/${encodeURIComponent(roomId)}`;
+        const res = await fetch(getUrl, { method: 'GET' });
+        if (res.ok) {
+          const textData = await res.text();
+          const cleaned = textData.replace(/^"|"$/g, '');
+          if (cleaned && cleaned !== 'null') {
+            try {
+              const decoded = JSON.parse(decodeURIComponent(escape(atob(cleaned))));
+              mergeRemotePayload(decoded);
+            } catch (parseErr) {
+              // Ignore initial empty or legacy format
+            }
+          }
+        }
+
+        // 2. Push merged state back to cloud room
+        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(getSyncPayload()))));
+        const postUrl = `https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/mc_family_v1/${encodeURIComponent(roomId)}/${encodeURIComponent(encoded)}`;
+        await fetch(postUrl, { method: 'POST' });
+
+        const nowStr = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+        state.lastSyncTime = nowStr;
+        saveState();
+
+        if (badgeEl) {
+          badgeEl.textContent = `✅ 已连接房间: ${roomId}`;
+          badgeEl.className = 'text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800';
+        }
+        const timeLabel = document.getElementById('last-sync-time-label');
+        if (timeLabel) timeLabel.textContent = `上次同步：${nowStr}`;
+        if (logEl) {
+          logEl.textContent = `✅ [${nowStr}] 云端房间「${roomId}」双向合并成功！毛毛在家的记录与春春在公司的记录已实时同步。`;
+        }
+        if (showFeedback) {
+          showToast(`☁️ 云房间「${roomId}」双向同步完成！`);
+        }
+      } catch (err) {
+        if (logEl && showFeedback) {
+          logEl.textContent = `⚠️ 当前网络环境受限或处于离线沙盒预览模式，请直接使用右侧「方案 B · 微信一键同步口令」秒传合并！`;
+        }
+        if (showFeedback) {
+          showToast('💡 当前环境无法连接外网云端，可使用右侧「微信同步口令」秒传合并');
+        }
+      }
+    }
+
+    function pushToCloudRoomSilent() {
+      syncWithCloudRoom(false);
+    }
+
+    function renderSyncView() {
+      const btnMao = document.getElementById('btn-role-mao');
+      const btnChun = document.getElementById('btn-role-chun');
+      if (btnMao && btnChun) {
+        if (state.deviceRole === 'mao') {
+          btnMao.className = 'py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-pink-500 text-white shadow-xs';
+          btnChun.className = 'py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-white/20 text-white hover:bg-white/30';
+        } else {
+          btnChun.className = 'py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-indigo-500 text-white shadow-xs';
+          btnMao.className = 'py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-white/20 text-white hover:bg-white/30';
+        }
+      }
+      const roomInput = document.getElementById('cloud-room-input');
+      if (roomInput && state.cloudRoomId) roomInput.value = state.cloudRoomId;
+      const chkAuto = document.getElementById('chk-auto-cloud-sync');
+      if (chkAuto) chkAuto.checked = Boolean(state.autoCloudSync);
+      const timeLabel = document.getElementById('last-sync-time-label');
+      if (timeLabel && state.lastSyncTime) timeLabel.textContent = `上次同步：${state.lastSyncTime}`;
+    }
+
+    function switchView(viewName) {
+      state.activeView = viewName;
+      const views = ['daily', 'matrix', 'shop', 'rules', 'sync'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        const navBtn = document.getElementById(`nav-${v}`);
+        if (!el || !navBtn) return;
+        if (v === viewName) {
+          el.classList.remove('hidden');
+          if (v === 'sync') {
+            navBtn.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1';
+          } else {
+            navBtn.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-indigo-600 shadow-sm';
+          }
+        } else {
+          el.classList.add('hidden');
+          if (v === 'sync') {
+            navBtn.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs flex items-center gap-1';
+          } else {
+            navBtn.className = 'px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900';
+          }
+        }
+      });
+      renderAll();
+    }
+
+    function renderAll() {
+      renderDashboardAndDayStrip();
+      if (state.activeView === 'daily') {
+        renderDailyView();
+      } else if (state.activeView === 'matrix') {
+        renderMatrixView();
+      } else if (state.activeView === 'shop') {
+        renderShopView();
+      } else if (state.activeView === 'sync') {
+        renderSyncView();
+      }
+    }
+
+    function initEvents() {
+      // Main Navigation
+      document.getElementById('nav-daily').addEventListener('click', () => switchView('daily'));
+      document.getElementById('nav-matrix').addEventListener('click', () => switchView('matrix'));
+      document.getElementById('nav-shop').addEventListener('click', () => switchView('shop'));
+      document.getElementById('nav-rules').addEventListener('click', () => switchView('rules'));
+      document.getElementById('nav-sync').addEventListener('click', () => switchView('sync'));
+
+      // Dual-Phone Sync & Role Controls
+      document.getElementById('btn-role-mao').addEventListener('click', () => {
+        state.deviceRole = 'mao';
+        saveState();
+        renderSyncView();
+        showToast('👩🏻‍🎨 已切换当前手机身份：毛毛（在家）');
+      });
+      document.getElementById('btn-role-chun').addEventListener('click', () => {
+        state.deviceRole = 'chun';
+        saveState();
+        renderSyncView();
+        showToast('🧑🏻‍💻 已切换当前手机身份：春春（工作）');
+      });
+      document.getElementById('btn-cloud-sync-now').addEventListener('click', () => {
+        syncWithCloudRoom(true);
+      });
+      document.getElementById('chk-auto-cloud-sync').addEventListener('change', (e) => {
+        state.autoCloudSync = e.target.checked;
+        saveState();
+      });
+
+      // WeChat 1-Click Sync Code Generator & Smart Merger
+      document.getElementById('btn-gen-wechat-code').addEventListener('click', () => {
+        const payload = getSyncPayload();
+        const code = '【毛春同步口令】' + btoa(unescape(encodeURIComponent(JSON.stringify(payload)))) + '【/毛春同步口令】';
+        const ta = document.getElementById('wechat-sync-textarea');
+        ta.value = code;
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast('📤 已复制同步口令！直接去微信粘贴发给对方即可');
+        } catch (e) {
+          showToast('📤 口令已生成在下方输入框，请全选复制发给对方');
+        }
+      });
+
+      document.getElementById('btn-merge-wechat-code').addEventListener('click', () => {
+        const raw = document.getElementById('wechat-sync-textarea').value.trim();
+        if (!raw) {
+          showToast('⚠️ 请先将伴侣微信发来的【毛春同步口令】粘贴到下方输入框');
+          return;
+        }
+        try {
+          const match = raw.match(/【毛春同步口令】([A-Za-z0-9+/=]+)【\/毛春同步口令】/);
+          const b64 = match ? match[1] : raw;
+          const decoded = JSON.parse(decodeURIComponent(escape(atob(b64))));
+          const count = mergeRemotePayload(decoded);
+          showToast(`🎉 智能合并成功！已合入对方最新打卡记录（更新 ${count} 处），双方积分均已保留！`);
+        } catch (e) {
+          showToast('⚠️ 同步口令格式不完整，请确认复制了整段口令文字');
+        }
+      });
+
+      // Month selector
+      document.getElementById('month-selector').addEventListener('change', (e) => {
+        state.currentMonth = e.target.value;
+        saveState();
+        renderAll();
+      });
+
+      // Category buttons
+      document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.catFilter = btn.getAttribute('data-cat');
+          document.querySelectorAll('.cat-filter-btn').forEach(b => {
+            if (b.getAttribute('data-cat') === state.catFilter) {
+              b.className = 'cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-xs transition-all';
+            } else {
+              b.className = 'cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all';
+            }
+          });
+          renderDailyView();
+        });
+      });
+
+      // Schedule & Owner filters
+      document.getElementById('filter-schedule').addEventListener('change', (e) => {
+        state.scheduleFilter = e.target.value;
+        renderDailyView();
+      });
+      document.getElementById('filter-owner').addEventListener('change', (e) => {
+        state.ownerFilter = e.target.value;
+        renderDailyView();
+      });
+
+      // Search input
+      const searchInput = document.getElementById('search-input');
+      const clearSearchBtn = document.getElementById('clear-search-btn');
+      searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        if (state.searchQuery) {
+          clearSearchBtn.classList.remove('hidden');
+        } else {
+          clearSearchBtn.classList.add('hidden');
+        }
+        renderDailyView();
+      });
+      clearSearchBtn.addEventListener('click', () => {
+        state.searchQuery = '';
+        searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        renderDailyView();
+      });
+
+      // Sidebar Tabs (Done vs Todo)
+      const sideTabDone = document.getElementById('side-tab-done');
+      const sideTabTodo = document.getElementById('side-tab-todo');
+      const doneList = document.getElementById('sidebar-done-list');
+      const todoList = document.getElementById('sidebar-todo-list');
+
+      sideTabDone.addEventListener('click', () => {
+        sideTabDone.className = 'flex-1 py-2 text-center border-b-2 border-indigo-600 text-indigo-600';
+        sideTabTodo.className = 'flex-1 py-2 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+        doneList.classList.remove('hidden');
+        todoList.classList.add('hidden');
+      });
+      sideTabTodo.addEventListener('click', () => {
+        sideTabTodo.className = 'flex-1 py-2 text-center border-b-2 border-indigo-600 text-indigo-600';
+        sideTabDone.className = 'flex-1 py-2 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+        todoList.classList.remove('hidden');
+        doneList.classList.add('hidden');
+      });
+
+      // Reset Today
+      document.getElementById('btn-reset-today').addEventListener('click', () => {
+        if (state.records[state.currentMonth]) {
+          delete state.records[state.currentMonth][state.selectedDay];
+          saveState();
+          renderAll();
+          showToast(`已清空第 ${state.selectedDay} 天的打卡记录`);
+        }
+      });
+
+      // Audit Buttons
+      document.getElementById('btn-audit-mao').addEventListener('click', () => {
+        if (!state.audits[state.currentMonth]) state.audits[state.currentMonth] = {};
+        if (!state.audits[state.currentMonth][state.selectedDay]) {
+          state.audits[state.currentMonth][state.selectedDay] = { chunAuditedByMao: false, maoAuditedByChun: false };
+        }
+        const cur = state.audits[state.currentMonth][state.selectedDay];
+        cur.maoAuditedByChun = !cur.maoAuditedByChun;
+        saveState();
+        renderDashboardAndDayStrip();
+        showToast(cur.maoAuditedByChun ? '✍️ 春春已审核签字确认毛毛今日积分！' : '已撤销春春对毛毛的签字审核');
+      });
+
+      document.getElementById('btn-audit-chun').addEventListener('click', () => {
+        if (!state.audits[state.currentMonth]) state.audits[state.currentMonth] = {};
+        if (!state.audits[state.currentMonth][state.selectedDay]) {
+          state.audits[state.currentMonth][state.selectedDay] = { chunAuditedByMao: false, maoAuditedByChun: false };
+        }
+        const cur = state.audits[state.currentMonth][state.selectedDay];
+        cur.chunAuditedByMao = !cur.chunAuditedByMao;
+        saveState();
+        renderDashboardAndDayStrip();
+        showToast(cur.chunAuditedByMao ? '✍️ 毛毛已审核签字确认春春今日积分！' : '已撤销毛毛对春春的签字审核');
+      });
+
+      // Matrix Category Filter
+      document.getElementById('matrix-cat-filter').addEventListener('change', (e) => {
+        state.matrixCatFilter = e.target.value;
+        renderMatrixView();
+      });
+
+      // Mystery Box Lottery
+      const handleLottery = (who) => {
+        const monthTotals = computeMonthTotals(state.currentMonth);
+        const avail = who === 'chun' ? monthTotals.chunAvail : monthTotals.maoAvail;
+        const whoName = who === 'chun' ? '春春' : '毛毛';
+        if (avail < 50) {
+          showToast(`⚠️ ${whoName}可用积分不足 50 分，快去完成项目赚积分吧！`);
+          return;
+        }
+        const prize = LOTTERY_PRIZES[Math.floor(Math.random() * LOTTERY_PRIZES.length)];
+        document.getElementById('lottery-result-box').innerHTML = `🎉 恭喜 <strong>${whoName}</strong> 抽中：<span class="text-amber-300 underline">${prize}</span>`;
+        handleRedeem(who, `盲盒抽奖 (${prize})`, 50);
+      };
+      document.getElementById('btn-lottery-chun').addEventListener('click', () => handleLottery('chun'));
+      document.getElementById('btn-lottery-mao').addEventListener('click', () => handleLottery('mao'));
+
+      // Custom Task Modal
+      const modal = document.getElementById('modal-custom-task');
+      const closeModal = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      };
+      document.getElementById('btn-open-custom-task').addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      });
+      document.getElementById('btn-close-custom-modal').addEventListener('click', closeModal);
+      document.getElementById('btn-cancel-custom-task').addEventListener('click', closeModal);
+      document.getElementById('btn-save-custom-task').addEventListener('click', () => {
+        const name = document.getElementById('custom-task-name').value.trim();
+        if (!name) {
+          showToast('⚠️ 请输入自定义项目名称');
+          return;
+        }
+        const cat = document.getElementById('custom-task-cat').value;
+        const pts = Math.max(1, Number(document.getElementById('custom-task-pts').value || 5));
+        const mode = document.getElementById('custom-task-mode').value;
+        const counterTypeVal = document.getElementById('custom-task-Counter').value;
+
+        const newTask = {
+          id: 'custom_' + Date.now(),
+          cat,
+          name,
+          pts,
+          unitText: counterTypeVal === 'chunk2h' ? `${pts}分 / 2小时` : `${pts}分 / 次`,
+          roleText: mode === 'chun' ? '春春负责' : mode === 'mao' ? '毛毛负责' : '毛毛和春春各自负责',
+          freqText: '每天/按需',
+          mode,
+          countType: counterTypeVal === 'chunk2h' ? 'duration' : counterTypeVal,
+          hoursPerUnit: counterTypeVal === 'chunk2h' ? 2 : undefined,
+          unitLabel: counterTypeVal === 'chunk2h' ? '2小时' : '次',
+          days: [0,1,2,3,4,5,6]
+        };
+
+        state.customTasks.push(newTask);
+        document.getElementById('custom-task-name').value = '';
+        saveState();
+        closeModal();
+        renderAll();
+        showToast(`✅ 已新增自定义项目「${name}」`);
+      });
+
+      // Backup & Demo Data Controls
+      document.getElementById('btn-load-demo').addEventListener('click', () => {
+        seedInitialDemoData();
+        saveState();
+        renderAll();
+        showToast('✨ 已加载多日演示数据，可切换18日、19日、20日查看');
+      });
+
+      document.getElementById('btn-export-data').addEventListener('click', () => {
+        const jsonStr = JSON.stringify({
+          records: state.records,
+          audits: state.audits,
+          redemptions: state.redemptions,
+          customTasks: state.customTasks
+        }, null, 2);
+        const ta = document.getElementById('backup-json-textarea');
+        ta.value = jsonStr;
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast('📤 已导出账本 JSON 并复制到剪贴板');
+        } catch (e) {
+          showToast('📤 已生成账本 JSON，请手动复制文本框内容');
+        }
+      });
+
+      document.getElementById('btn-import-data').addEventListener('click', () => {
+        const raw = document.getElementById('backup-json-textarea').value.trim();
+        if (!raw) {
+          showToast('⚠️ 请先在文本框中粘贴备份的 JSON 数据');
+          return;
+        }
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed.records) state.records = parsed.records;
+          if (parsed.audits) state.audits = parsed.audits;
+          if (parsed.redemptions) state.redemptions = parsed.redemptions;
+          if (parsed.customTasks) state.customTasks = parsed.customTasks;
+          saveState();
+          renderAll();
+          showToast('📥 账本数据导入恢复成功！');
+        } catch (e) {
+          showToast('⚠️ JSON 格式有误，请检查后重试');
+        }
+      });
+
+      document.getElementById('btn-clear-all').addEventListener('click', () => {
+        state.records = {};
+        state.audits = {};
+        state.redemptions = [];
+        state.customTasks = [];
+        saveState();
+        renderAll();
+        showToast('🗑️ 已重置全部账本数据');
+      });
+    }
+
+    // Initialize Application
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      initEvents();
+      renderAll();
+    });
+  </script>
+</body>
+</html>
