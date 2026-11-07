@@ -1,4 +1,4 @@
-const CACHE_NAME = 'maochun-v3';
+const CACHE_NAME = 'maochun-v4';
 const LOCAL_ASSETS = [
   './',
   './index.html',
@@ -66,3 +66,4 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
