@@ -2,11 +2,16 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="毛春积分" />
   <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="description" content="毛春家庭任务打卡、积分与愿望兑换账本" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon.svg" />
   <title>毛春家庭新政 · 积分制管理系统</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -51,6 +56,56 @@
       color: #b45309;
       border: 1px solid #fde68a;
     }
+    .task-act-btn, button, select, input {
+      touch-action: manipulation;
+    }
+    .sync-state-dot[data-state="synced"] { background: #34d399; }
+    .sync-state-dot[data-state="syncing"], .sync-state-dot[data-state="connecting"] { background: #fbbf24; }
+    .sync-state-dot[data-state="offline"], .sync-state-dot[data-state="pending"] { background: #fb923c; }
+    .sync-state-dot[data-state="error"] { background: #fb7185; }
+    .sync-state-dot[data-state="local"], .sync-state-dot[data-state="needs_family"] { background: #94a3b8; }
+    @media (max-width: 640px) {
+      body { padding-bottom: 76px; font-size: 15px; }
+      header { position: static !important; }
+      header nav {
+        position: fixed;
+        z-index: 45;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 0 !important;
+        padding: 7px 6px calc(7px + env(safe-area-inset-bottom)) !important;
+        background: rgba(255,255,255,.97) !important;
+        border-top: 1px solid #e2e8f0;
+        box-shadow: 0 -8px 24px rgba(15,23,42,.08);
+        gap: 2px !important;
+      }
+      header nav button {
+        flex: 1;
+        min-width: 0;
+        min-height: 48px;
+        padding: 5px 2px !important;
+        font-size: 11px !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        line-height: 1.15;
+      }
+      section.bg-slate-900 .grid {
+        display: flex !important;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 4px;
+      }
+      section.bg-slate-900 .grid > div {
+        min-width: 84vw;
+        scroll-snap-align: start;
+      }
+      .task-act-btn { min-height: 44px !important; min-width: 44px !important; }
+      #toast-container { left: 12px; right: 12px; bottom: 88px; }
+      #toast-box { justify-content: center; text-align: center; }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -68,26 +123,30 @@
             <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">1 积分 = 1 元 RMB</span>
           </div>
           <p class="text-xs text-slate-500 hidden sm:block">无条件自信 · 松弛安全感 · 眼里有活主动出击 · 双盲交叉审核</p>
+          <button id="header-sync-status" type="button" class="mt-1 inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 hover:text-indigo-700" title="查看多设备同步状态">
+            <span id="header-sync-dot" data-state="local" class="sync-state-dot w-2 h-2 rounded-full"></span>
+            <span id="header-sync-label">本机已保存 · 云同步待配置</span>
+          </button>
         </div>
       </div>
 
       <!-- Main Navigation Tabs -->
       <nav class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
         <button id="nav-daily" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-indigo-600 shadow-sm">
-          📋 每日项目列选打卡
+          📋 今日
         </button>
         <button id="nav-matrix" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
-          📅 30天全景明细表
+          📅 记录
         </button>
         <button id="nav-shop" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
-          🎁 愿望商城与金库
+          🎁 兑换
         </button>
         <button id="nav-rules" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
-          ⚖️ 制度与数据管理
+          ⚙️ 设置
         </button>
         <button id="nav-sync" type="button" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs flex items-center gap-1">
-          <span>📲 双手机同步/安装</span>
-          <span id="sync-status-dot" class="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span>
+          <span>📲 同步</span>
+          <span id="sync-status-dot" data-state="local" class="sync-state-dot w-2 h-2 rounded-full"></span>
         </button>
       </nav>
     </div>
@@ -210,13 +269,9 @@
       <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
         <div class="flex items-center gap-2">
           <label for="month-selector" class="text-xs font-bold text-slate-700">📅 考核月份:</label>
-          <select id="month-selector" class="text-xs font-semibold bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="2026-10">2026年10月 (30天考核周期)</option>
-            <option value="2026-11">2026年11月 (30天考核周期)</option>
-            <option value="2026-12">2026年12月 (30天考核周期)</option>
-          </select>
+          <select id="month-selector" class="text-xs font-semibold bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"></select>
           <span id="current-day-weekday-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
-            第 20 天 · 星期二
+            今天
           </span>
         </div>
         <div class="flex items-center gap-2 text-xs text-slate-500">
@@ -268,6 +323,7 @@
             </select>
 
             <select id="filter-owner" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="mine">⭐ 我的任务 + 共同任务</option>
               <option value="all">👥 全部角色分工</option>
               <option value="chun">🧑🏻‍💻 春春负责 / 牵头</option>
               <option value="mao">👩🏻‍🎨 毛毛负责 / 牵头 / 专属</option>
@@ -315,7 +371,7 @@
             <div>
               <h2 class="text-base font-bold text-slate-900 flex items-center gap-1.5">
                 <span>📊</span>
-                <span id="sidebar-day-title">第 20 天 · 实时积分成绩单</span>
+                <span id="sidebar-day-title">今日实时积分成绩单</span>
               </h2>
               <p class="text-xs text-slate-500 mt-0.5">清晰看到今天谁做了什么、谁截了胡、什么还没做</p>
             </div>
@@ -377,8 +433,8 @@
       <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
-            <h2 class="text-lg font-bold text-slate-900">📅 30天全景积分与项目追踪矩阵</h2>
-            <p class="text-xs text-slate-500 mt-0.5">纵览整月 30 天春春与毛毛每日积分对比，以及每个项目在 30 天内哪天做了、谁做的、是否截胡</p>
+            <h2 class="text-lg font-bold text-slate-900">📅 月度全景积分与项目追踪矩阵</h2>
+            <p class="text-xs text-slate-500 mt-0.5">纵览整月每一天春春与毛毛的积分对比，以及各项目哪天做了、谁做的、是否截胡</p>
           </div>
           <div class="flex items-center gap-2">
             <select id="matrix-cat-filter" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium text-slate-700">
@@ -541,148 +597,83 @@
       </div>
     </div>
 
-    <!-- VIEW 5: DUAL-PHONE CLOUD SYNC & APPLE/ANDROID GUIDE -->
+    <!-- VIEW 5: SECURE MULTI-DEVICE SYNC & INSTALLATION -->
     <div id="view-sync" class="hidden space-y-5">
-      <!-- Top Banner: Current Identity & Live Sync Status -->
-      <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-5 text-white shadow-md">
+      <div class="bg-gradient-to-r from-indigo-600 via-violet-600 to-pink-600 rounded-2xl p-5 text-white shadow-md">
         <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="space-y-1">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-xs font-semibold">
-              <span>🍎 苹果 iOS + 🤖 安卓 Android 双端通用</span>
-            </div>
-            <h2 class="text-lg sm:text-xl font-bold">毛毛在家打卡 · 春春在公司打卡 · 双机数据互通中心</h2>
-            <p class="text-xs text-indigo-100 max-w-2xl">
-              采用<strong>“按项目时间戳智能合并算法”</strong>：你在家积毛毛的分、他在公司积春春的分（或互相截胡），两边数据合并时<strong>自动保留双方最新成果，绝不互相覆盖</strong>！
-            </p>
+          <div class="space-y-1.5">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-xs font-semibold">📱 三台及更多设备实时同步</div>
+            <h2 class="text-lg sm:text-xl font-bold">一个家庭账本，所有手机自动保持一致</h2>
+            <p class="text-sm text-indigo-100 max-w-2xl">每次操作先安全保存在本机，再由服务器原子记账并实时推送。离线也能打卡，联网后自动补传，不再靠刷新或手工合并。</p>
           </div>
-          <!-- Current Device Identity Switcher -->
-          <div class="bg-white/15 backdrop-blur-xs border border-white/20 rounded-xl p-3 flex flex-col gap-1.5 min-w-[220px]">
-            <span class="text-[11px] text-indigo-100 font-semibold">📱 当前这台手机是谁在用？</span>
-            <div class="grid grid-cols-2 gap-1.5">
-              <button id="btn-role-mao" type="button" class="py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-pink-500 text-white shadow-xs">
-                👩🏻‍🎨 我是毛毛(在家)
-              </button>
-              <button id="btn-role-chun" type="button" class="py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-white/20 text-white hover:bg-white/30">
-                🧑🏻‍💻 我是春春(工作)
-              </button>
-            </div>
+          <div class="bg-white/15 border border-white/20 rounded-xl p-3 min-w-[230px]">
+            <div class="text-xs text-indigo-100">当前设备</div>
+            <div id="sync-current-device" class="font-bold mt-1">尚未加入家庭</div>
+            <div id="sync-pending-count" class="text-xs text-indigo-100 mt-1">本机待上传 0 条</div>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <!-- Mode 1: Real-time Cloud Room Sync -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div>
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">方案 A · 自动云端同步</span>
-              <h3 class="text-base font-bold text-slate-900 mt-1">☁️ 家庭云端共享房间（两台手机输入同一暗号）</h3>
-            </div>
-            <span id="cloud-room-badge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
-              未连接云房间
-            </span>
+      <div id="sync-config-missing" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-5">
+        <h3 class="font-bold text-amber-900">☁️ 云同步代码已就绪，还差一次后端连接</h3>
+        <p class="text-sm text-amber-800 mt-2">当前仍会可靠保存在本机。按仓库 README 的“首次配置”完成 Supabase 设置后，三台手机会自动启用实时同步。</p>
+      </div>
+
+      <div id="sync-family-setup" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl border border-indigo-200 p-5 shadow-xs space-y-4">
+          <div>
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">第一台手机</span>
+            <h3 class="text-base font-bold text-slate-900 mt-1">创建家庭账本</h3>
+            <p class="text-xs text-slate-500 mt-1">只需创建一次，系统会生成一段无法猜测的邀请码。</p>
           </div>
-
-          <p class="text-xs text-slate-600 leading-relaxed">
-            毛毛和春春在各自手机上输入同一个<strong>专属家庭房间号</strong>（例如：<code>maochun2026</code>），点击“连接并立即同步”。每次一方打卡后点击同步（或开启自动同步），两边数据即可通过云端实时拉取合并！
-          </p>
-
-          <div class="space-y-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
-            <div>
-              <label for="cloud-room-input" class="font-bold text-slate-700 block mb-1">🔑 家庭专属同步房间暗号（双方填一样的英文+数字）：</label>
-              <div class="flex gap-2">
-                <input id="cloud-room-input" type="text" value="maochun2026" placeholder="如：maochun2026" class="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                <button id="btn-cloud-sync-now" type="button" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-colors shrink-0">
-                  🔄 立即云端双向同步
-                </button>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-2 border-t border-slate-200/80 text-[11px] text-slate-500">
-              <label class="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-700">
-                <input id="chk-auto-cloud-sync" type="checkbox" class="rounded text-indigo-600" checked />
-                <span>每次打卡后自动推送到云端房间</span>
-              </label>
-              <span id="last-sync-time-label">上次同步：尚未同步</span>
-            </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <input id="create-family-name" type="text" maxlength="50" value="毛春家庭" placeholder="家庭名称" class="border border-slate-300 rounded-xl px-3 py-3" />
+            <input id="create-display-name" type="text" maxlength="30" placeholder="你的称呼，如：毛毛" class="border border-slate-300 rounded-xl px-3 py-3" />
+            <select id="create-person-role" class="border border-slate-300 rounded-xl px-3 py-3"><option value="mao">我是毛毛</option><option value="chun">我是春春</option></select>
+            <input id="create-device-name" type="text" maxlength="50" placeholder="设备名称，如：客厅 iPhone" class="border border-slate-300 rounded-xl px-3 py-3" />
           </div>
-
-          <div id="cloud-sync-log" class="p-3 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] leading-relaxed">
-            💡 状态就绪：在两台手机打开本网页，填入相同暗号“maochun2026”并点击「立即云端双向同步」即可互通。
-          </div>
+          <button id="btn-create-family" type="button" class="w-full min-h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold">创建并上传本机账本</button>
         </div>
 
-        <!-- Mode 2: WeChat 1-Click Smart Merge Code (100% Offline/Firewall-proof) -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div>
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">方案 B · 微信秒传合并（最稳妥·零配置）</span>
-              <h3 class="text-base font-bold text-slate-900 mt-1">💬 微信一键“同步口令”智能合并</h3>
-            </div>
-            <span class="text-xs font-semibold text-indigo-600">无需配置 · 1秒合账</span>
-          </div>
-
-          <p class="text-xs text-slate-600 leading-relaxed">
-            如果你们平时用微信联系，这是最简单、永不受网络限制的方式：<br/>
-            1️⃣ <strong>毛毛在家</strong>打完卡，点下方<strong>「复制我的打卡口令」</strong>发给春春微信；<br/>
-            2️⃣ <strong>春春在公司</strong>打完自己的卡，把毛毛发的口令粘贴到下方点<strong>「智能合并对方记录」</strong>，系统会自动把毛毛在家做的 + 春春在公司做的合二为一！
-          </p>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <button id="btn-gen-wechat-code" type="button" class="py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs">
-              <span>📤 1. 复制我的打卡口令发微信</span>
-            </button>
-            <button id="btn-merge-wechat-code" type="button" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs">
-              <span>📥 2. 粘贴对方口令并智能合并</span>
-            </button>
-          </div>
-
+        <div class="bg-white rounded-2xl border border-emerald-200 p-5 shadow-xs space-y-4">
           <div>
-            <textarea id="wechat-sync-textarea" rows="3" placeholder="生成的微信同步口令会显示在这里；或者把伴侣从微信发来的【毛春同步口令】粘贴到这里，点击上方绿色按钮即可合账..." class="w-full text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">第二、三台手机</span>
+            <h3 class="text-base font-bold text-slate-900 mt-1">用邀请码加入</h3>
+            <p class="text-xs text-slate-500 mt-1">从第一台手机复制完整邀请码，不会上传本机旧演示数据。</p>
+          </div>
+          <input id="join-invite-token" type="text" maxlength="36" placeholder="粘贴 36 位家庭邀请码" class="w-full border border-slate-300 rounded-xl px-3 py-3 font-mono text-sm" />
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+            <input id="join-display-name" type="text" maxlength="30" placeholder="你的称呼" class="border border-slate-300 rounded-xl px-3 py-3" />
+            <select id="join-person-role" class="border border-slate-300 rounded-xl px-3 py-3"><option value="mao">我是毛毛</option><option value="chun">我是春春</option></select>
+            <input id="join-device-name" type="text" maxlength="50" placeholder="设备名称" class="border border-slate-300 rounded-xl px-3 py-3" />
+          </div>
+          <button id="btn-join-family" type="button" class="w-full min-h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">加入并读取家庭账本</button>
+        </div>
+      </div>
+
+      <div id="sync-family-connected" class="hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="text-xs text-slate-500">已连接家庭</div>
+            <h3 id="connected-family-name" class="text-lg font-bold text-slate-900">家庭账本</h3>
+            <p id="connected-family-member" class="text-sm text-slate-600 mt-1"></p>
+          </div>
+          <button id="btn-refresh-cloud" type="button" class="min-h-11 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold">立即检查更新</button>
+        </div>
+        <div id="invite-token-panel" class="hidden rounded-xl bg-indigo-50 border border-indigo-200 p-4">
+          <div class="text-xs font-bold text-indigo-900">家庭邀请码（只在创建时显示，请保存并发给另外两台手机）</div>
+          <div class="flex flex-col sm:flex-row gap-2 mt-2">
+            <input id="created-invite-token" readonly class="flex-1 border border-indigo-200 rounded-lg px-3 py-2 font-mono text-sm bg-white" />
+            <button id="btn-copy-invite" type="button" class="min-h-11 px-4 rounded-lg bg-indigo-600 text-white text-sm font-bold">复制邀请码</button>
           </div>
         </div>
       </div>
 
-      <!-- Apple iOS & Android Installation Guide -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-        <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3">
-          <div>
-            <h3 class="text-base font-bold text-slate-900">📱 如何把这个软件装进毛毛和春春的手机里（像原生 App 一样点图标即用）？</h3>
-            <p class="text-xs text-slate-500 mt-0.5">苹果 iPhone 与安卓手机均完全支持，无需去应用商店审核，按下面 2 步即可放到手机桌面</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-            <div class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-              <span>🌐 第一步：获取手机访问链接或文件</span>
-            </div>
-            <p class="text-slate-600 leading-relaxed">
-              你可以直接将本单文件网页（<code>maochun_points_system.html</code>）托管到任何免费静态空间（如 GitHub Pages、Cloudflare Pages、Vercel，拖进去 10 秒自动生成专属网址），或者直接把文件发到手机微信/浏览器打开。
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-indigo-50/60 border border-indigo-200 space-y-2">
-            <div class="text-sm font-bold text-indigo-950 flex items-center gap-1.5">
-              <span>🍎 苹果 iPhone 手机安装方法</span>
-            </div>
-            <p class="text-indigo-900 leading-relaxed">
-              1. 用 iPhone 自带的 <strong>Safari 浏览器</strong>打开网址/文件；<br/>
-              2. 点击底部正中间的<strong>「分享按钮 📤」</strong>；<br/>
-              3. 往下滑点击<strong>「添加到主屏幕 (Add to Home Screen)」</strong>，手机桌面就会生成<strong>「毛春积分」</strong>专属图标，全屏运行！
-            </p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-2">
-            <div class="text-sm font-bold text-emerald-950 flex items-center gap-1.5">
-              <span>🤖 安卓 Android 手机安装方法</span>
-            </div>
-            <p class="text-emerald-900 leading-relaxed">
-              1. 用安卓自带浏览器、<strong>Chrome 或 Edge</strong> 打开；<br/>
-              2. 点击右上角菜单<strong>「⋮」</strong>或底部菜单；<br/>
-              3. 选择<strong>「添加到主屏幕」</strong>或<strong>「安装应用」</strong>，即可在手机桌面生成独立 App 图标，随时随地打卡！
-            </p>
-          </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+        <h3 class="text-base font-bold text-slate-900">📲 安装到手机桌面</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 text-sm">
+          <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-100"><strong>iPhone / iPad：</strong>用 Safari 打开公开网址 → 分享 → 添加到主屏幕。</div>
+          <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100"><strong>Android：</strong>用 Chrome 或 Edge 打开 → 浏览器菜单 → 安装应用 / 添加到主屏幕。</div>
         </div>
       </div>
     </div>
@@ -748,6 +739,10 @@
     </div>
   </div>
 
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="sync-core.js"></script>
+  <script src="app-sync.js"></script>
   <script>
     // =========================================================================
     // 1. COMPLETE TASK CATALOG FROM 《毛春家庭新政10.18.md》 (All 75 Tasks)
@@ -901,19 +896,40 @@
     // =========================================================================
     // 2. APPLICATION STATE & STORAGE
     // =========================================================================
-    const STORAGE_KEY = 'maochun_points_system_v1';
+    const STORAGE_KEY = 'maochun_points_system_v2';
+    const LEGACY_STORAGE_KEY = 'maochun_points_system_v1';
+    const STORAGE_BACKUP_KEY = `${STORAGE_KEY}_backup`;
+
+    function getShanghaiToday() {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).formatToParts(new Date()).reduce((acc, part) => {
+        acc[part.type] = part.value;
+        return acc;
+      }, {});
+      return { month: `${parts.year}-${parts.month}`, day: Number(parts.day) };
+    }
+
+    const shanghaiToday = getShanghaiToday();
+    let storageHealthy = true;
+    let cloudSync = null;
+    let syncRuntime = {
+      status: 'local',
+      message: '本机已保存 · 云同步待配置',
+      detail: '',
+      family: null,
+      configured: false
+    };
 
     let state = {
-      currentMonth: '2026-10',
-      selectedDay: 20, // Default to Day 20 (Oct 20, 2026)
+      currentMonth: shanghaiToday.month,
+      selectedDay: shanghaiToday.day,
       activeView: 'daily',
       deviceRole: 'mao', // 'mao' or 'chun'
-      cloudRoomId: 'maochun2026',
-      autoCloudSync: true,
       lastSyncTime: '',
       catFilter: 'all',
-      scheduleFilter: 'all',
-      ownerFilter: 'all',
+      scheduleFilter: 'recommended',
+      ownerFilter: 'mine',
       searchQuery: '',
       sideTab: 'done',
       matrixCatFilter: 'all',
@@ -923,11 +939,23 @@
       // audits[monthKey][dayNum] = { chunAuditedByMao: false, maoAuditedByChun: false }
       audits: {},
       // redemptions = [{ id, dateStr, who: 'chun'|'mao', itemName, pts }]
-      redemptions: []
+      redemptions: [],
+      pendingOperations: [],
+      deviceId: crypto.randomUUID(),
+      inviteToken: ''
     };
 
     function getAllTasks() {
       return [...INITIAL_TASKS, ...(state.customTasks || [])];
+    }
+
+    function snapshotToCloudOperations(snapshot) {
+      const pointsByTask = new Map(getAllTasks().map((task) => [task.id, Number(task.pts) || 1]));
+      return window.MaoChunCore.snapshotToOperations(
+        snapshot,
+        undefined,
+        (taskId) => pointsByTask.get(taskId) || 1
+      );
     }
 
     // Weekday calculation for a given month ('2026-10') and day (1..30)
@@ -936,6 +964,27 @@
       const [y, m] = monthStr.split('-').map(Number);
       const d = new Date(y, m - 1, dayNum);
       return d.getDay(); // 0 (Sun) to 6 (Sat)
+    }
+
+    function getDaysInMonth(monthStr) {
+      const [year, month] = monthStr.split('-').map(Number);
+      return new Date(year, month, 0).getDate();
+    }
+
+    function populateMonthSelector() {
+      const selector = document.getElementById('month-selector');
+      if (!selector) return;
+      const [baseYear, baseMonth] = shanghaiToday.month.split('-').map(Number);
+      const values = new Set([state.currentMonth]);
+      for (let offset = -2; offset <= 9; offset++) {
+        const date = new Date(baseYear, baseMonth - 1 + offset, 1);
+        values.add(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
+      }
+      selector.innerHTML = [...values].sort().map((value) => {
+        const [year, month] = value.split('-');
+        return `<option value="${value}">${year}年${Number(month)}月 · ${getDaysInMonth(value)}天</option>`;
+      }).join('');
+      selector.value = state.currentMonth;
     }
 
     function isTaskRecommendedForDay(task, weekday) {
@@ -989,9 +1038,6 @@
       }
       saveState();
       renderAll();
-      if (state.autoCloudSync && state.cloudRoomId) {
-        pushToCloudRoomSilent();
-      }
     }
 
     function seedInitialDemoData() {
@@ -1038,25 +1084,162 @@
     }
 
     function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
+      const candidates = [STORAGE_KEY, STORAGE_BACKUP_KEY, LEGACY_STORAGE_KEY];
+      for (const key of candidates) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) continue;
           const parsed = JSON.parse(raw);
-          state = { ...state, ...parsed };
-          return;
+          if (!parsed || typeof parsed !== 'object') continue;
+          state = {
+            ...state,
+            ...parsed,
+            records: parsed.records && typeof parsed.records === 'object' ? parsed.records : {},
+            audits: parsed.audits && typeof parsed.audits === 'object' ? parsed.audits : {},
+            redemptions: Array.isArray(parsed.redemptions) ? parsed.redemptions.map((item) => ({
+              ...item,
+              id: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.id || '')
+                ? item.id
+                : crypto.randomUUID()
+            })) : [],
+            customTasks: Array.isArray(parsed.customTasks) ? parsed.customTasks : [],
+            pendingOperations: Array.isArray(parsed.pendingOperations) ? parsed.pendingOperations : [],
+            deviceId: parsed.deviceId || crypto.randomUUID()
+          };
+          storageHealthy = true;
+          if (key !== STORAGE_KEY) saveState();
+          return true;
+        } catch (error) {
+          storageHealthy = false;
         }
-      } catch (e) {
-        // Fallback if localStorage is restricted
       }
-      seedInitialDemoData();
+      return false;
     }
 
     function saveState() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (e) {
-        // Ignore storage errors in sandboxed iframe
+        const serialized = JSON.stringify(state);
+        const existing = localStorage.getItem(STORAGE_KEY);
+        localStorage.setItem(`${STORAGE_KEY}_tmp`, serialized);
+        JSON.parse(localStorage.getItem(`${STORAGE_KEY}_tmp`));
+        if (existing) localStorage.setItem(STORAGE_BACKUP_KEY, existing);
+        localStorage.setItem(STORAGE_KEY, serialized);
+        localStorage.removeItem(`${STORAGE_KEY}_tmp`);
+        storageHealthy = true;
+        return true;
+      } catch (error) {
+        storageHealthy = false;
+        return false;
       }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, (char) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      })[char]);
+    }
+
+    function selectedDateString() {
+      return `${state.currentMonth}-${String(state.selectedDay).padStart(2, '0')}`;
+    }
+
+    function makeOperation(type, payload) {
+      return {
+        id: crypto.randomUUID(),
+        type,
+        payload,
+        client_created_at: new Date().toISOString()
+      };
+    }
+
+    function scheduleCloudFlush() {
+      updateSyncUi();
+      if (cloudSync) {
+        clearTimeout(window._cloudFlushTimer);
+        window._cloudFlushTimer = setTimeout(() => cloudSync.flushPending(), 120);
+      }
+    }
+
+    function performOperation(type, payload, { render = true } = {}) {
+      const operation = makeOperation(type, payload);
+      window.MaoChunCore.applyOperation(state, operation);
+      state.pendingOperations.push(operation);
+      const saved = saveState();
+      if (!saved) showToast('⚠️ 本机存储失败，请勿刷新并先导出备份');
+      if (render) renderAll();
+      scheduleCloudFlush();
+      return operation;
+    }
+
+    function queueOperationsWithoutApplying(operations) {
+      const now = new Date().toISOString();
+      for (const operation of operations) {
+        state.pendingOperations.push({ ...operation, client_created_at: operation.client_created_at || now });
+      }
+      saveState();
+      scheduleCloudFlush();
+    }
+
+    function applyCloudSnapshot(snapshot) {
+      const overlaid = window.MaoChunCore.overlayPending(snapshot, state.pendingOperations);
+      state.records = overlaid.records;
+      state.audits = overlaid.audits;
+      state.redemptions = overlaid.redemptions;
+      state.customTasks = overlaid.customTasks;
+      state.lastSyncTime = new Date().toLocaleTimeString('zh-CN', { hour12: false, timeZone: 'Asia/Shanghai' });
+      saveState();
+      renderAll();
+    }
+
+    function acknowledgeOperation(operationId) {
+      state.pendingOperations = state.pendingOperations.filter((operation) => operation.id !== operationId);
+      saveState();
+      updateSyncUi();
+    }
+
+    function rejectOperation(operationId, reason) {
+      state.pendingOperations = state.pendingOperations.filter((operation) => operation.id !== operationId);
+      saveState();
+      updateSyncUi();
+      showToast(`⚠️ 一条无效操作已隔离，其他记录会继续同步${reason ? `：${reason}` : ''}`);
+    }
+
+    function updateSyncUi() {
+      const pendingCount = state.pendingOperations.length;
+      const effectiveStatus = storageHealthy ? syncRuntime.status : 'error';
+      const effectiveMessage = storageHealthy ? syncRuntime.message : '本机存储失败，请立即导出备份';
+      for (const id of ['sync-status-dot', 'header-sync-dot']) {
+        const dot = document.getElementById(id);
+        if (dot) dot.dataset.state = effectiveStatus;
+      }
+      const headerLabel = document.getElementById('header-sync-label');
+      if (headerLabel) headerLabel.textContent = pendingCount ? `${effectiveMessage} · 待上传 ${pendingCount}` : effectiveMessage;
+      const pendingLabel = document.getElementById('sync-pending-count');
+      if (pendingLabel) pendingLabel.textContent = `本机待上传 ${pendingCount} 条`;
+
+      const configMissing = document.getElementById('sync-config-missing');
+      const familySetup = document.getElementById('sync-family-setup');
+      const familyConnected = document.getElementById('sync-family-connected');
+      if (configMissing) configMissing.classList.toggle('hidden', syncRuntime.configured);
+      if (familySetup) familySetup.classList.toggle('hidden', !syncRuntime.configured || Boolean(syncRuntime.family));
+      if (familyConnected) familyConnected.classList.toggle('hidden', !syncRuntime.family);
+
+      const device = document.getElementById('sync-current-device');
+      if (device) {
+        device.textContent = syncRuntime.family
+          ? `${syncRuntime.family.displayName} · ${syncRuntime.family.deviceName}`
+          : '尚未加入家庭';
+      }
+      if (syncRuntime.family) {
+        const familyName = document.getElementById('connected-family-name');
+        const familyMember = document.getElementById('connected-family-member');
+        if (familyName) familyName.textContent = syncRuntime.family.name;
+        if (familyMember) familyMember.textContent = `${syncRuntime.family.displayName} · ${syncRuntime.family.personRole === 'chun' ? '春春' : '毛毛'} · ${syncRuntime.family.deviceName}`;
+      }
+      const invitePanel = document.getElementById('invite-token-panel');
+      const inviteInput = document.getElementById('created-invite-token');
+      if (invitePanel) invitePanel.classList.toggle('hidden', !state.inviteToken);
+      if (inviteInput) inviteInput.value = state.inviteToken || '';
     }
 
     function showToast(msg) {
@@ -1092,7 +1275,7 @@
         const cCount = r.chunCount || 0;
         const mCount = r.maoCount || 0;
         if (cCount > 0) {
-          const pts = cCount * task.pts;
+          const pts = cCount * (Number(r.pointsPerUnit) || task.pts);
           chunPts += pts;
           chunItems += 1;
           doneEntries.push({
@@ -1104,7 +1287,7 @@
           });
         }
         if (mCount > 0) {
-          const pts = mCount * task.pts;
+          const pts = mCount * (Number(r.pointsPerUnit) || task.pts);
           maoPts += pts;
           maoItems += 1;
           doneEntries.push({
@@ -1124,20 +1307,20 @@
     function computeMonthTotals(monthStr) {
       let chunMonth = 0;
       let maoMonth = 0;
-      for (let d = 1; d <= 30; d++) {
+      for (let d = 1; d <= getDaysInMonth(monthStr); d++) {
         const dt = computeDayTotals(monthStr, d);
         chunMonth += dt.chunPts;
         maoMonth += dt.maoPts;
       }
       const spentChun = state.redemptions
-        .filter(r => r.who === 'chun')
+        .filter(r => r.who === 'chun' && String(r.dateStr || '').startsWith(`${monthStr}-`))
         .reduce((acc, r) => acc + r.pts, 0);
       const spentMao = state.redemptions
-        .filter(r => r.who === 'mao')
+        .filter(r => r.who === 'mao' && String(r.dateStr || '').startsWith(`${monthStr}-`))
         .reduce((acc, r) => acc + r.pts, 0);
       const totalSpent = spentChun + spentMao;
       const familyMonth = chunMonth + maoMonth;
-      const redeemable = Math.min(3000, familyMonth);
+      const redeemable = Math.max(0, Math.min(3000, familyMonth) - totalSpent);
       const centralBank = Math.max(0, familyMonth - 3000);
 
       return {
@@ -1171,57 +1354,42 @@
       const weekday = getWeekday(state.currentMonth, state.selectedDay);
       const effMode = getEffectiveMode(task, weekday);
       const cur = getTaskRecord(state.currentMonth, state.selectedDay, taskId);
-      const next = { ...cur };
+      const person = action.endsWith('chun') ? 'chun' : action.endsWith('mao') ? 'mao' : null;
+      if (!person) return;
+      const countKey = person === 'chun' ? 'chunCount' : 'maoCount';
+      const isToggle = action.startsWith('toggle_');
+      const actualDelta = isToggle ? ((cur[countKey] || 0) > 0 ? -(cur[countKey] || 0) : 1) : Number(delta || 0);
+      if (!actualDelta) return;
+      const owner = effMode === 'chun' || effMode === 'mao' ? effMode : 'both';
 
-      if (action === 'toggle_chun') {
-        next.chunCount = next.chunCount > 0 ? 0 : 1;
-        if (effMode === 'mao' && next.chunCount > 0) {
-          next.maoCount = 0;
-          next.stealBy = 'chun';
-          showToast(`🚀 春春截胡/代劳「${task.name}」+${task.pts}分！`);
-        } else {
-          if (effMode === 'chun') next.maoCount = 0;
-          next.stealBy = null;
-          if (next.chunCount > 0) showToast(`🧑🏻‍💻 春春完成「${task.name}」+${task.pts}分`);
-        }
-      } else if (action === 'toggle_mao') {
-        next.maoCount = next.maoCount > 0 ? 0 : 1;
-        if (effMode === 'chun' && next.maoCount > 0) {
-          next.chunCount = 0;
-          next.stealBy = 'mao';
-          showToast(`🚀 毛毛截胡/代劳「${task.name}」+${task.pts}分！`);
-        } else {
-          if (effMode === 'mao') next.chunCount = 0;
-          next.stealBy = null;
-          if (next.maoCount > 0) showToast(`👩🏻‍🎨 毛毛完成「${task.name}」+${task.pts}分`);
-        }
-      } else if (action === 'step_chun') {
-        next.chunCount = Math.max(0, (next.chunCount || 0) + delta);
-        if (effMode === 'mao' && next.chunCount > 0) {
-          next.stealBy = 'chun';
-          if (delta > 0) showToast(`🚀 春春代劳/截胡「${task.name}」累计 ${next.chunCount}${task.unitLabel} (+${next.chunCount * task.pts}分)`);
-        } else if (delta > 0) {
-          showToast(`🧑🏻‍💻 春春「${task.name}」累计 ${next.chunCount}${task.unitLabel} (+${next.chunCount * task.pts}分)`);
-        }
-        if (next.chunCount === 0 && next.stealBy === 'chun') next.stealBy = null;
-      } else if (action === 'step_mao') {
-        next.maoCount = Math.max(0, (next.maoCount || 0) + delta);
-        if (effMode === 'chun' && next.maoCount > 0) {
-          next.stealBy = 'mao';
-          if (delta > 0) showToast(`🚀 毛毛代劳/截胡「${task.name}」累计 ${next.maoCount}${task.unitLabel} (+${next.maoCount * task.pts}分)`);
-        } else if (delta > 0) {
-          showToast(`👩🏻‍🎨 毛毛「${task.name}」累计 ${next.maoCount}${task.unitLabel} (+${next.maoCount * task.pts}分)`);
-        }
-        if (next.maoCount === 0 && next.stealBy === 'mao') next.stealBy = null;
+      performOperation('task_delta', {
+        day: selectedDateString(),
+        task_id: taskId,
+        person,
+        delta: actualDelta,
+        owner,
+        max_count: task.countType === 'once' ? 1 : null,
+        points_per_unit: Math.max(1, Math.min(100000, Math.trunc(Number(task.pts) || 1)))
+      });
+
+      const updated = getTaskRecord(state.currentMonth, state.selectedDay, taskId);
+      const count = updated[countKey] || 0;
+      if (actualDelta > 0) {
+        const whoName = person === 'chun' ? '春春' : '毛毛';
+        const icon = person === 'chun' ? '🧑🏻‍💻' : '👩🏻‍🎨';
+        const stealText = updated.stealBy === person ? '截胡/代劳' : '完成';
+        showToast(`${updated.stealBy === person ? '🚀' : icon} ${whoName}${stealText}「${task.name}」· 当前 ${count}${task.unitLabel || '次'}`);
+      } else {
+        showToast(`已撤销「${task.name}」1次，三台设备将同步更新`);
       }
-
-      setTaskRecord(state.currentMonth, state.selectedDay, taskId, next);
     }
 
     // =========================================================================
     // 5. RENDERING FUNCTIONS
     // =========================================================================
     function renderDashboardAndDayStrip() {
+      state.selectedDay = Math.min(Math.max(1, Number(state.selectedDay) || 1), getDaysInMonth(state.currentMonth));
+      populateMonthSelector();
       const dayTotals = computeDayTotals(state.currentMonth, state.selectedDay);
       const monthTotals = computeMonthTotals(state.currentMonth);
       const weekday = getWeekday(state.currentMonth, state.selectedDay);
@@ -1281,10 +1449,10 @@
         btnAuditMao.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-center gap-1 bg-slate-700/80 hover:bg-indigo-600/80 text-slate-200 border-slate-600';
       }
 
-      // Render 30-day horizontal strip
+      // Render the actual number of days in the selected month
       const strip = document.getElementById('day-strip-container');
       let stripHtml = '';
-      for (let d = 1; d <= 30; d++) {
+      for (let d = 1; d <= getDaysInMonth(state.currentMonth); d++) {
         const dt = computeDayTotals(state.currentMonth, d);
         const wd = getWeekday(state.currentMonth, d);
         const wdShort = ['日', '一', '二', '三', '四', '五', '六'][wd];
@@ -1343,7 +1511,7 @@
         if (task.countType === 'once') {
           return `
             <div class="flex items-center gap-2 flex-wrap justify-end">
-              <button type="button" data-task="${task.id}" data-action="toggle_chun" class="task-act-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+              <button type="button" data-task="${escapeHtml(task.id)}" data-action="toggle_chun" class="task-act-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
                 cCount > 0
                   ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
                   : 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'
@@ -1352,7 +1520,7 @@
                 <span class="text-[11px] ${cCount > 0 ? 'text-indigo-100' : 'text-indigo-500'}">+${task.pts}分</span>
               </button>
 
-              <button type="button" data-task="${task.id}" data-action="toggle_mao" class="task-act-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+              <button type="button" data-task="${escapeHtml(task.id)}" data-action="toggle_mao" class="task-act-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
                 mCount > 0
                   ? 'bg-pink-600 text-white border-pink-600 shadow-xs'
                   : 'bg-white text-pink-700 border-pink-200 hover:bg-pink-50'
@@ -1370,17 +1538,17 @@
               <!-- Chunchun Counter -->
               <div class="flex items-center rounded-xl border ${cCount > 0 ? 'border-indigo-400 bg-indigo-50/70' : 'border-slate-200 bg-slate-50'} p-1 gap-1">
                 <span class="text-[11px] font-bold text-indigo-700 px-1.5">🧑🏻‍💻春春</span>
-                <button type="button" data-task="${task.id}" data-action="step_chun" data-delta="-1" class="task-act-btn w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold flex items-center justify-center" ${cCount === 0 ? 'disabled' : ''}>-</button>
+                <button type="button" data-task="${escapeHtml(task.id)}" data-action="step_chun" data-delta="-1" class="task-act-btn w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold flex items-center justify-center" ${cCount === 0 ? 'disabled' : ''}>-</button>
                 <span class="text-xs font-bold text-indigo-800 px-1.5 min-w-[64px] text-center">${cCount > 0 ? formatCountDetail(cCount) : '0次'}</span>
-                <button type="button" data-task="${task.id}" data-action="step_chun" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold flex items-center justify-center">${stepLabel}</button>
+                <button type="button" data-task="${escapeHtml(task.id)}" data-action="step_chun" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold flex items-center justify-center">${escapeHtml(stepLabel)}</button>
               </div>
 
               <!-- Maomao Counter -->
               <div class="flex items-center rounded-xl border ${mCount > 0 ? 'border-pink-400 bg-pink-50/70' : 'border-slate-200 bg-slate-50'} p-1 gap-1">
                 <span class="text-[11px] font-bold text-pink-700 px-1.5">👩🏻‍🎨毛毛</span>
-                <button type="button" data-task="${task.id}" data-action="step_mao" data-delta="-1" class="task-act-btn w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold flex items-center justify-center" ${mCount === 0 ? 'disabled' : ''}>-</button>
+                <button type="button" data-task="${escapeHtml(task.id)}" data-action="step_mao" data-delta="-1" class="task-act-btn w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold flex items-center justify-center" ${mCount === 0 ? 'disabled' : ''}>-</button>
                 <span class="text-xs font-bold text-pink-800 px-1.5 min-w-[64px] text-center">${mCount > 0 ? formatCountDetail(mCount) : '0次'}</span>
-                <button type="button" data-task="${task.id}" data-action="step_mao" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-pink-600 hover:bg-pink-700 text-white text-[11px] font-semibold flex items-center justify-center">${stepLabel}</button>
+                <button type="button" data-task="${escapeHtml(task.id)}" data-action="step_mao" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-pink-600 hover:bg-pink-700 text-white text-[11px] font-semibold flex items-center justify-center">${escapeHtml(stepLabel)}</button>
               </div>
             </div>
           `;
@@ -1410,7 +1578,7 @@
         return `
           <div class="flex items-center gap-2 flex-wrap justify-end">
             <!-- Primary Designated Owner Button -->
-            <button type="button" data-task="${task.id}" data-action="${ownerToggleAct}" class="task-act-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+            <button type="button" data-task="${escapeHtml(task.id)}" data-action="${ownerToggleAct}" class="task-act-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
               ownerCount > 0 ? ownerActiveClass : ownerIdleClass
             }">
               <span>${ownerCount > 0 ? '✅' : '⭕'} ${ownerName}完成 (本职)</span>
@@ -1418,7 +1586,7 @@
             </button>
 
             <!-- Steal / Substitute Button -->
-            <button type="button" data-task="${task.id}" data-action="${stealerToggleAct}" class="task-act-btn px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1 ${
+            <button type="button" data-task="${escapeHtml(task.id)}" data-action="${stealerToggleAct}" class="task-act-btn px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1 ${
               stealerCount > 0
                 ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
                 : 'bg-amber-50/70 text-amber-800 border-amber-200 hover:bg-amber-100'
@@ -1437,19 +1605,19 @@
             <!-- Primary Owner Stepper -->
             <div class="flex items-center rounded-xl border ${ownerCount > 0 ? `border-${ownerColor}-400 bg-${ownerColor}-50/70` : 'border-slate-200 bg-slate-50'} p-1 gap-1">
               <span class="text-[11px] font-bold text-${ownerColor}-700 px-1.5">${ownerName}(本职)</span>
-              <button type="button" data-task="${task.id}" data-action="${ownerStepAct}" data-delta="-1" class="task-act-btn w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold flex items-center justify-center" ${ownerCount === 0 ? 'disabled' : ''}>-</button>
+              <button type="button" data-task="${escapeHtml(task.id)}" data-action="${ownerStepAct}" data-delta="-1" class="task-act-btn w-6 h-6 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold flex items-center justify-center" ${ownerCount === 0 ? 'disabled' : ''}>-</button>
               <span class="text-xs font-bold text-${ownerColor}-800 px-1.5 min-w-[72px] text-center">${ownerCount > 0 ? formatCountDetail(ownerCount) : '0次'}</span>
-              <button type="button" data-task="${task.id}" data-action="${ownerStepAct}" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-${ownerColor}-600 hover:bg-${ownerColor}-700 text-white text-[11px] font-semibold flex items-center justify-center">${stepLabel}</button>
+              <button type="button" data-task="${escapeHtml(task.id)}" data-action="${ownerStepAct}" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-${ownerColor}-600 hover:bg-${ownerColor}-700 text-white text-[11px] font-semibold flex items-center justify-center">${escapeHtml(stepLabel)}</button>
             </div>
 
             <!-- Stealer / Substitute Stepper -->
             <div class="flex items-center rounded-xl border ${stealerCount > 0 ? 'border-amber-400 bg-amber-50' : 'border-amber-200/80 bg-amber-50/30'} p-1 gap-1" title="由${stealerName}主动代劳或截胡完成">
               <span class="text-[11px] font-bold text-amber-800 px-1">🚀${stealerName}代劳</span>
               ${stealerCount > 0 ? `
-                <button type="button" data-task="${task.id}" data-action="${stealerStepAct}" data-delta="-1" class="task-act-btn w-5 h-6 rounded-lg bg-white border border-amber-300 text-amber-800 text-xs font-bold flex items-center justify-center">-</button>
+                <button type="button" data-task="${escapeHtml(task.id)}" data-action="${stealerStepAct}" data-delta="-1" class="task-act-btn w-5 h-6 rounded-lg bg-white border border-amber-300 text-amber-800 text-xs font-bold flex items-center justify-center">-</button>
                 <span class="text-xs font-bold text-amber-900 px-1">${formatCountDetail(stealerCount)}</span>
               ` : ''}
-              <button type="button" data-task="${task.id}" data-action="${stealerStepAct}" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-semibold flex items-center justify-center">+1截胡</button>
+              <button type="button" data-task="${escapeHtml(task.id)}" data-action="${stealerStepAct}" data-delta="1" class="task-act-btn px-2 h-6 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-semibold flex items-center justify-center">+1截胡</button>
             </div>
           </div>
         `;
@@ -1461,13 +1629,24 @@
       const weekday = getWeekday(state.currentMonth, state.selectedDay);
       const weekdayName = WEEKDAY_NAMES[weekday];
       const allTasks = getAllTasks();
+      const scheduleSelect = document.getElementById('filter-schedule');
+      const ownerSelect = document.getElementById('filter-owner');
+      if (scheduleSelect) scheduleSelect.value = state.scheduleFilter;
+      if (ownerSelect) ownerSelect.value = state.ownerFilter;
+      document.querySelectorAll('.cat-filter-btn').forEach((button) => {
+        const active = button.getAttribute('data-cat') === state.catFilter;
+        button.className = active
+          ? 'cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-xs transition-all'
+          : 'cat-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all';
+      });
 
       // Filter tasks
       const filteredTasks = allTasks.filter(task => {
         if (state.catFilter !== 'all' && task.cat !== state.catFilter) return false;
 
         const effMode = getEffectiveMode(task, weekday);
-        if (state.ownerFilter !== 'all' && effMode !== state.ownerFilter) return false;
+        if (state.ownerFilter === 'mine' && effMode !== state.deviceRole && effMode !== 'both') return false;
+        if (!['all', 'mine'].includes(state.ownerFilter) && effMode !== state.ownerFilter) return false;
 
         const rec = getTaskRecord(state.currentMonth, state.selectedDay, task.id);
         const isDone = (rec.chunCount || 0) > 0 || (rec.maoCount || 0) > 0;
@@ -1519,26 +1698,26 @@
           // Role badge styling
           let roleBadge = '';
           if (effMode === 'chun') {
-            roleBadge = `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md chun-badge">🧑🏻‍💻 ${task.roleText}</span>`;
+            roleBadge = `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md chun-badge">🧑🏻‍💻 ${escapeHtml(task.roleText)}</span>`;
           } else if (effMode === 'mao') {
-            roleBadge = `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md mao-badge">👩🏻‍🎨 ${task.roleText}</span>`;
+            roleBadge = `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md mao-badge">👩🏻‍🎨 ${escapeHtml(task.roleText)}</span>`;
           } else {
-            roleBadge = `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">👥 ${task.roleText}</span>`;
+            roleBadge = `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">👥 ${escapeHtml(task.roleText)}</span>`;
           }
 
           // Frequency & Today Recommendation Tag
           const recBadge = Array.isArray(task.days) && task.days.length < 7 && isRec
             ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-indigo-600 text-white">📅 今日(${weekdayName})排期应做</span>`
-            : `<span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">🕒 ${task.freqText}</span>`;
+            : `<span class="text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">🕒 ${escapeHtml(task.freqText)}</span>`;
 
           // Special Type Tag
           let typeBadge = '';
           if (task.countType === 'duration') {
-            typeBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">⏱️ 按${task.unitLabel}累加 (${task.unitText})</span>`;
+            typeBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">⏱️ 按${escapeHtml(task.unitLabel)}累加 (${escapeHtml(task.unitText)})</span>`;
           } else if (task.countType === 'multi') {
-            typeBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200">🔢 可多次计次 (${task.unitText})</span>`;
+            typeBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200">🔢 可多次计次 (${escapeHtml(task.unitText)})</span>`;
           } else {
-            typeBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">${task.unitText}</span>`;
+            typeBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">${escapeHtml(task.unitText)}</span>`;
           }
 
           html += `
@@ -1547,7 +1726,7 @@
             }">
               <div class="space-y-1.5 pr-2">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-sm font-bold ${isDone ? 'text-slate-900' : 'text-slate-800'}">${task.name}</span>
+                  <span class="text-sm font-bold ${isDone ? 'text-slate-900' : 'text-slate-800'}">${escapeHtml(task.name)}</span>
                   ${typeBadge}
                   ${rec.stealBy ? `<span class="text-[11px] font-bold px-2 py-0.5 rounded-md steal-badge">🚀 ${rec.stealBy === 'chun' ? '春春' : '毛毛'}截胡/代劳得分</span>` : ''}
                 </div>
@@ -1630,7 +1809,7 @@
               <div class="space-y-0.5">
                 <div class="font-semibold text-slate-800 flex items-center gap-1.5 flex-wrap">
                   <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeCls}">${whoLabel}</span>
-                  <span>${entry.task.name}</span>
+                  <span>${escapeHtml(entry.task.name)}</span>
                   ${entry.isSteal ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold steal-badge">🚀截胡/代劳</span>' : ''}
                 </div>
                 <div class="text-[11px] text-slate-500">完成数量：${detailText}</div>
@@ -1666,8 +1845,8 @@
           return `
             <div class="p-2.5 rounded-xl border border-slate-200 bg-white flex items-center justify-between gap-2 text-xs">
               <div>
-                <div class="font-semibold text-slate-800">${t.name}</div>
-                <div class="text-[11px] text-slate-500">${ownerTag} · ${t.unitText} · ${t.freqText}</div>
+                <div class="font-semibold text-slate-800">${escapeHtml(t.name)}</div>
+                <div class="text-[11px] text-slate-500">${ownerTag} · ${escapeHtml(t.unitText)} · ${escapeHtml(t.freqText)}</div>
               </div>
               <button type="button" data-quick-task="${t.id}" class="quick-todo-btn px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] shrink-0">
                 去打卡
@@ -1699,9 +1878,9 @@
       const tasksHeader = document.getElementById('matrix-tasks-header');
       const tasksBody = document.getElementById('matrix-tasks-body');
 
-      // 1. Summary Table Header (Day 1 .. Day 30)
+      // 1. Summary Table Header
       let sHeadHtml = `<th class="p-2.5 font-bold bg-slate-100 sticky left-0 z-10 border-r border-slate-200 min-w-[120px]">角色 / 日期</th>`;
-      for (let d = 1; d <= 30; d++) {
+      for (let d = 1; d <= getDaysInMonth(state.currentMonth); d++) {
         const wd = ['日','一','二','三','四','五','六'][getWeekday(state.currentMonth, d)];
         sHeadHtml += `
           <th class="p-2 text-center font-semibold min-w-[46px] border-r border-slate-200/60 cursor-pointer hover:bg-indigo-50" data-jump-day="${d}">
@@ -1718,7 +1897,7 @@
       let totalChun = 0;
       let totalMao = 0;
 
-      for (let d = 1; d <= 30; d++) {
+      for (let d = 1; d <= getDaysInMonth(state.currentMonth); d++) {
         const dt = computeDayTotals(state.currentMonth, d);
         totalChun += dt.chunPts;
         totalMao += dt.maoPts;
@@ -1733,11 +1912,11 @@
         <tr>${maoRowHtml}</tr>
       `;
 
-      // 2. Per-Task 30-Day Matrix
+      // 2. Per-Task monthly matrix
       let tHeadHtml = `
         <th class="p-2.5 font-bold bg-slate-100 sticky left-0 z-20 border-r border-slate-200 min-w-[210px]">考核项目名称 (积分标准)</th>
       `;
-      for (let d = 1; d <= 30; d++) {
+      for (let d = 1; d <= getDaysInMonth(state.currentMonth); d++) {
         tHeadHtml += `<th class="p-1.5 text-center font-semibold min-w-[38px] border-r border-slate-200/60">${d}</th>`;
       }
       tasksHeader.innerHTML = tHeadHtml;
@@ -1749,11 +1928,11 @@
         tBodyHtml += `<tr class="hover:bg-slate-50">`;
         tBodyHtml += `
           <td class="p-2 font-medium text-slate-800 bg-white sticky left-0 z-10 border-r border-slate-200">
-            <div class="truncate max-w-[200px]" title="${task.name}">${task.name}</div>
-            <div class="text-[10px] text-slate-400">${task.unitText} · ${task.roleText}</div>
+            <div class="truncate max-w-[200px]" title="${escapeHtml(task.name)}">${escapeHtml(task.name)}</div>
+            <div class="text-[10px] text-slate-400">${escapeHtml(task.unitText)} · ${escapeHtml(task.roleText)}</div>
           </td>
         `;
-        for (let d = 1; d <= 30; d++) {
+        for (let d = 1; d <= getDaysInMonth(state.currentMonth); d++) {
           const rec = getTaskRecord(state.currentMonth, d, task.id);
           const c = rec.chunCount || 0;
           const m = rec.maoCount || 0;
@@ -1820,7 +1999,7 @@
                 <p class="text-xs text-slate-500 mt-1">${item.desc}</p>
               </div>
               <div class="flex items-center gap-2 pt-1">
-                <input id="price-${item.id}" type="number" min="1" value="${item.defaultPts}" ${item.fixed ? 'readonly' : ''} class="w-20 text-xs font-bold text-slate-800 bg-white border border-slate-300 rounded-lg px-2 py-1.5" />
+                <input id="price-${item.id}" type="number" min="1" max="100000" step="1" inputmode="numeric" value="${item.defaultPts}" ${item.fixed ? 'readonly' : ''} class="w-20 text-xs font-bold text-slate-800 bg-white border border-slate-300 rounded-lg px-2 py-1.5" />
                 <span class="text-xs text-slate-500">分</span>
                 <div class="ml-auto flex items-center gap-1.5">
                   ${item.target !== 'mao' ? `
@@ -1848,7 +2027,12 @@
           const who = btn.getAttribute('data-who');
           const item = SHOP_ITEMS.find(x => x.id === itemId);
           const priceInput = document.getElementById(`price-${itemId}`);
-          const pts = Math.max(1, Number(priceInput?.value || item.defaultPts));
+          const rawPoints = Number(priceInput?.value || item.defaultPts);
+          const pts = Math.trunc(rawPoints);
+          if (!Number.isFinite(rawPoints) || rawPoints !== pts || pts < 1 || pts > 100000) {
+            showToast('⚠️ 兑换积分请输入 1–100000 之间的整数');
+            return;
+          }
           handleRedeem(who, item.name, pts);
         });
       });
@@ -1857,6 +2041,11 @@
     }
 
     function handleRedeem(who, itemName, pts) {
+      pts = Math.trunc(Number(pts));
+      if (!Number.isFinite(pts) || pts < 1 || pts > 100000) {
+        showToast('⚠️ 兑换积分无效，请重新输入');
+        return;
+      }
       const monthTotals = computeMonthTotals(state.currentMonth);
       const avail = who === 'chun' ? monthTotals.chunAvail : monthTotals.maoAvail;
       const whoName = who === 'chun' ? '春春' : '毛毛';
@@ -1865,16 +2054,20 @@
         showToast(`⚠️ ${whoName}当前可用积分不足（需 ${pts} 分，当前可用 ${avail} 分）`);
         return;
       }
+      if (monthTotals.redeemable < pts) {
+        showToast(`⚠️ 本月家庭基金剩余 ${monthTotals.redeemable} 元，不足以兑换 ${pts} 元`);
+        return;
+      }
+      const afterBalance = avail - pts;
+      if (!window.confirm(`${whoName}确定兑换「${itemName}」吗？\n将扣除 ${pts} 分，个人剩余 ${afterBalance} 分，家庭基金剩余 ${monthTotals.redeemable - pts} 元。`)) return;
 
-      state.redemptions.unshift({
-        id: 'red_' + Date.now(),
-        dateStr: `${state.currentMonth}-${String(state.selectedDay).padStart(2, '0')}`,
-        who,
-        itemName,
-        pts
+      performOperation('redemption_create', {
+        redemption_id: crypto.randomUUID(),
+        person: who,
+        item_name: String(itemName).slice(0, 100),
+        points: pts,
+        redeemed_on: selectedDateString()
       });
-      saveState();
-      renderAll();
       showToast(`🎉 ${whoName}成功兑换「${itemName}」，核销 ${pts} 积分！`);
     }
 
@@ -1889,7 +2082,7 @@
           <div>
             <div class="font-semibold text-slate-800">
               <span class="${r.who === 'chun' ? 'text-indigo-600' : 'text-pink-600'} font-bold">${r.who === 'chun' ? '🧑🏻‍💻春春' : '👩🏻‍🎨毛毛'}</span>
-              兑换「${r.itemName}」
+              兑换「${escapeHtml(r.itemName)}」
             </div>
             <div class="text-[11px] text-slate-400">${r.dateStr}</div>
           </div>
@@ -1903,9 +2096,9 @@
       listEl.querySelectorAll('.del-redeem-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const rid = btn.getAttribute('data-del-redeem');
-          state.redemptions = state.redemptions.filter(x => x.id !== rid);
-          saveState();
-          renderAll();
+          const redemption = state.redemptions.find((item) => item.id === rid);
+          if (!redemption || !window.confirm(`确定撤销「${redemption.itemName}」这笔兑换并退回 ${redemption.pts} 分吗？`)) return;
+          performOperation('redemption_cancel', { redemption_id: rid });
           showToast('已撤销该笔积分兑换并退回余额');
         });
       });
@@ -1915,193 +2108,10 @@
     // 8. NAVIGATION & EVENT BINDINGS
     // =========================================================================
     // =========================================================================
-    // SMART DUAL-PHONE MERGE ENGINE & CLOUD ROOM SYNC
+    // SECURE MULTI-DEVICE SYNC UI
     // =========================================================================
-    function mergeRemotePayload(remote) {
-      if (!remote || typeof remote !== 'object') return 0;
-      let mergedChanges = 0;
-
-      // 1. Merge records per month -> day -> taskId
-      if (remote.records && typeof remote.records === 'object') {
-        for (const [mKey, daysObj] of Object.entries(remote.records)) {
-          if (!state.records[mKey]) state.records[mKey] = {};
-          for (const [dKey, tasksObj] of Object.entries(daysObj || {})) {
-            if (!state.records[mKey][dKey]) state.records[mKey][dKey] = {};
-            for (const [tId, rRec] of Object.entries(tasksObj || {})) {
-              const lRec = state.records[mKey][dKey][tId];
-              if (!lRec) {
-                state.records[mKey][dKey][tId] = { ...rRec };
-                mergedChanges++;
-              } else {
-                const lTs = lRec.updatedAt || 0;
-                const rTs = rRec.updatedAt || 0;
-                // If both have timestamps, take the newer one; if timestamps are missing or equal, take max of each person's count so Maomao at home + Chunchun at work both keep their points!
-                if (rTs > lTs) {
-                  // Even if remote is newer overall, if one person only updated their own side, preserve non-zero counts from the other partner if not a steal overwrite
-                  const mergedChun = rRec.stealBy ? rRec.chunCount : Math.max(lRec.chunCount || 0, rRec.chunCount || 0);
-                  const mergedMao = rRec.stealBy ? rRec.maoCount : Math.max(lRec.maoCount || 0, rRec.maoCount || 0);
-                  state.records[mKey][dKey][tId] = {
-                    chunCount: rRec.updatedAt ? rRec.chunCount : mergedChun,
-                    maoCount: rRec.updatedAt ? rRec.maoCount : mergedMao,
-                    stealBy: rRec.stealBy || lRec.stealBy || null,
-                    updatedAt: Math.max(lTs, rTs)
-                  };
-                  mergedChanges++;
-                } else if (rTs === lTs) {
-                  const newC = Math.max(lRec.chunCount || 0, rRec.chunCount || 0);
-                  const newM = Math.max(lRec.maoCount || 0, rRec.maoCount || 0);
-                  if (newC !== (lRec.chunCount || 0) || newM !== (lRec.maoCount || 0)) {
-                    state.records[mKey][dKey][tId] = {
-                      chunCount: newC,
-                      maoCount: newM,
-                      stealBy: rRec.stealBy || lRec.stealBy || null,
-                      updatedAt: Date.now()
-                    };
-                    mergedChanges++;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // 2. Merge audits
-      if (remote.audits && typeof remote.audits === 'object') {
-        for (const [mKey, daysObj] of Object.entries(remote.audits)) {
-          if (!state.audits[mKey]) state.audits[mKey] = {};
-          for (const [dKey, aRec] of Object.entries(daysObj || {})) {
-            const curA = state.audits[mKey][dKey] || { chunAuditedByMao: false, maoAuditedByChun: false };
-            state.audits[mKey][dKey] = {
-              chunAuditedByMao: Boolean(curA.chunAuditedByMao || aRec.chunAuditedByMao),
-              maoAuditedByChun: Boolean(curA.maoAuditedByChun || aRec.maoAuditedByChun)
-            };
-          }
-        }
-      }
-
-      // 3. Merge customTasks by id
-      if (Array.isArray(remote.customTasks)) {
-        const existingIds = new Set((state.customTasks || []).map(t => t.id));
-        for (const ct of remote.customTasks) {
-          if (ct && ct.id && !existingIds.has(ct.id)) {
-            state.customTasks.push(ct);
-            mergedChanges++;
-          }
-        }
-      }
-
-      // 4. Merge redemptions by id
-      if (Array.isArray(remote.redemptions)) {
-        const existingRIds = new Set((state.redemptions || []).map(r => r.id));
-        for (const r of remote.redemptions) {
-          if (r && r.id && !existingRIds.has(r.id)) {
-            state.redemptions.push(r);
-            mergedChanges++;
-          }
-        }
-      }
-
-      saveState();
-      renderAll();
-      return mergedChanges;
-    }
-
-    function getSyncPayload() {
-      return {
-        v: 1,
-        ts: Date.now(),
-        by: state.deviceRole,
-        records: state.records,
-        audits: state.audits,
-        customTasks: state.customTasks,
-        redemptions: state.redemptions
-      };
-    }
-
-    // Cloud Room Sync using public KV store (keyvalue.immanuel.co / npoint fallback)
-    async function syncWithCloudRoom(showFeedback = true) {
-      const roomInput = document.getElementById('cloud-room-input');
-      const roomId = (roomInput ? roomInput.value.trim() : state.cloudRoomId).replace(/[^a-zA-Z0-9_-]/g, '') || 'maochun2026';
-      state.cloudRoomId = roomId;
-      saveState();
-
-      const logEl = document.getElementById('cloud-sync-log');
-      const badgeEl = document.getElementById('cloud-room-badge');
-      if (logEl && showFeedback) {
-        logEl.textContent = `🔄 正在连接云端房间 [${roomId}] 拉取并合并毛毛与春春的最新积分...`;
-      }
-
-      try {
-        // 1. Fetch existing room data
-        const getUrl = `https://keyvalue.immanuel.co/api/KeyVal/GetValue/mc_family_v1/${encodeURIComponent(roomId)}`;
-        const res = await fetch(getUrl, { method: 'GET' });
-        if (res.ok) {
-          const textData = await res.text();
-          const cleaned = textData.replace(/^"|"$/g, '');
-          if (cleaned && cleaned !== 'null') {
-            try {
-              const decoded = JSON.parse(decodeURIComponent(escape(atob(cleaned))));
-              mergeRemotePayload(decoded);
-            } catch (parseErr) {
-              // Ignore initial empty or legacy format
-            }
-          }
-        }
-
-        // 2. Push merged state back to cloud room
-        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(getSyncPayload()))));
-        const postUrl = `https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/mc_family_v1/${encodeURIComponent(roomId)}/${encodeURIComponent(encoded)}`;
-        await fetch(postUrl, { method: 'POST' });
-
-        const nowStr = new Date().toLocaleTimeString('zh-CN', { hour12: false });
-        state.lastSyncTime = nowStr;
-        saveState();
-
-        if (badgeEl) {
-          badgeEl.textContent = `✅ 已连接房间: ${roomId}`;
-          badgeEl.className = 'text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800';
-        }
-        const timeLabel = document.getElementById('last-sync-time-label');
-        if (timeLabel) timeLabel.textContent = `上次同步：${nowStr}`;
-        if (logEl) {
-          logEl.textContent = `✅ [${nowStr}] 云端房间「${roomId}」双向合并成功！毛毛在家的记录与春春在公司的记录已实时同步。`;
-        }
-        if (showFeedback) {
-          showToast(`☁️ 云房间「${roomId}」双向同步完成！`);
-        }
-      } catch (err) {
-        if (logEl && showFeedback) {
-          logEl.textContent = `⚠️ 当前网络环境受限或处于离线沙盒预览模式，请直接使用右侧「方案 B · 微信一键同步口令」秒传合并！`;
-        }
-        if (showFeedback) {
-          showToast('💡 当前环境无法连接外网云端，可使用右侧「微信同步口令」秒传合并');
-        }
-      }
-    }
-
-    function pushToCloudRoomSilent() {
-      syncWithCloudRoom(false);
-    }
-
     function renderSyncView() {
-      const btnMao = document.getElementById('btn-role-mao');
-      const btnChun = document.getElementById('btn-role-chun');
-      if (btnMao && btnChun) {
-        if (state.deviceRole === 'mao') {
-          btnMao.className = 'py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-pink-500 text-white shadow-xs';
-          btnChun.className = 'py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-white/20 text-white hover:bg-white/30';
-        } else {
-          btnChun.className = 'py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-indigo-500 text-white shadow-xs';
-          btnMao.className = 'py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all bg-white/20 text-white hover:bg-white/30';
-        }
-      }
-      const roomInput = document.getElementById('cloud-room-input');
-      if (roomInput && state.cloudRoomId) roomInput.value = state.cloudRoomId;
-      const chkAuto = document.getElementById('chk-auto-cloud-sync');
-      if (chkAuto) chkAuto.checked = Boolean(state.autoCloudSync);
-      const timeLabel = document.getElementById('last-sync-time-label');
-      if (timeLabel && state.lastSyncTime) timeLabel.textContent = `上次同步：${state.lastSyncTime}`;
+      updateSyncUi();
     }
 
     function switchView(viewName) {
@@ -2151,62 +2161,89 @@
       document.getElementById('nav-rules').addEventListener('click', () => switchView('rules'));
       document.getElementById('nav-sync').addEventListener('click', () => switchView('sync'));
 
-      // Dual-Phone Sync & Role Controls
-      document.getElementById('btn-role-mao').addEventListener('click', () => {
-        state.deviceRole = 'mao';
-        saveState();
-        renderSyncView();
-        showToast('👩🏻‍🎨 已切换当前手机身份：毛毛（在家）');
-      });
-      document.getElementById('btn-role-chun').addEventListener('click', () => {
-        state.deviceRole = 'chun';
-        saveState();
-        renderSyncView();
-        showToast('🧑🏻‍💻 已切换当前手机身份：春春（工作）');
-      });
-      document.getElementById('btn-cloud-sync-now').addEventListener('click', () => {
-        syncWithCloudRoom(true);
-      });
-      document.getElementById('chk-auto-cloud-sync').addEventListener('change', (e) => {
-        state.autoCloudSync = e.target.checked;
-        saveState();
-      });
-
-      // WeChat 1-Click Sync Code Generator & Smart Merger
-      document.getElementById('btn-gen-wechat-code').addEventListener('click', () => {
-        const payload = getSyncPayload();
-        const code = '【毛春同步口令】' + btoa(unescape(encodeURIComponent(JSON.stringify(payload)))) + '【/毛春同步口令】';
-        const ta = document.getElementById('wechat-sync-textarea');
-        ta.value = code;
-        ta.select();
-        try {
-          document.execCommand('copy');
-          showToast('📤 已复制同步口令！直接去微信粘贴发给对方即可');
-        } catch (e) {
-          showToast('📤 口令已生成在下方输入框，请全选复制发给对方');
-        }
-      });
-
-      document.getElementById('btn-merge-wechat-code').addEventListener('click', () => {
-        const raw = document.getElementById('wechat-sync-textarea').value.trim();
-        if (!raw) {
-          showToast('⚠️ 请先将伴侣微信发来的【毛春同步口令】粘贴到下方输入框');
+      // Secure multi-device setup and status
+      document.getElementById('header-sync-status').addEventListener('click', () => switchView('sync'));
+      document.getElementById('btn-create-family').addEventListener('click', async () => {
+        if (!cloudSync) return;
+        const familyName = document.getElementById('create-family-name').value.trim();
+        const displayName = document.getElementById('create-display-name').value.trim();
+        const personRole = document.getElementById('create-person-role').value;
+        const deviceName = document.getElementById('create-device-name').value.trim();
+        if (!familyName || !displayName || !deviceName) {
+          showToast('⚠️ 请填写家庭名称、称呼和设备名称');
           return;
         }
+        const localSnapshot = {
+          records: structuredClone(state.records), audits: structuredClone(state.audits),
+          redemptions: structuredClone(state.redemptions), customTasks: structuredClone(state.customTasks)
+        };
         try {
-          const match = raw.match(/【毛春同步口令】([A-Za-z0-9+/=]+)【\/毛春同步口令】/);
-          const b64 = match ? match[1] : raw;
-          const decoded = JSON.parse(decodeURIComponent(escape(atob(b64))));
-          const count = mergeRemotePayload(decoded);
-          showToast(`🎉 智能合并成功！已合入对方最新打卡记录（更新 ${count} 处），双方积分均已保留！`);
-        } catch (e) {
-          showToast('⚠️ 同步口令格式不完整，请确认复制了整段口令文字');
+          const result = await cloudSync.createHousehold({ familyName, displayName, personRole, deviceName });
+          state.deviceRole = personRole;
+          state.inviteToken = result.invite_token;
+          const migrationOperations = snapshotToCloudOperations(localSnapshot);
+          queueOperationsWithoutApplying(migrationOperations);
+          await cloudSync.flushPending();
+          saveState();
+          updateSyncUi();
+          showToast('✅ 家庭账本已创建，请保存邀请码并在另外两台手机加入');
+        } catch (error) {
+          showToast(`⚠️ ${error.message}`);
+        }
+      });
+      document.getElementById('btn-join-family').addEventListener('click', async () => {
+        if (!cloudSync) return;
+        const inviteToken = document.getElementById('join-invite-token').value.trim();
+        const displayName = document.getElementById('join-display-name').value.trim();
+        const personRole = document.getElementById('join-person-role').value;
+        const deviceName = document.getElementById('join-device-name').value.trim();
+        if (!inviteToken || !displayName || !deviceName) {
+          showToast('⚠️ 请填写完整邀请码、称呼和设备名称');
+          return;
+        }
+        // A joining phone must adopt the existing family ledger. Do not replay
+        // unrelated offline actions that were created before it joined.
+        const pendingBeforeJoin = structuredClone(state.pendingOperations);
+        try {
+          state.deviceRole = personRole;
+          state.inviteToken = '';
+          state.pendingOperations = [];
+          saveState();
+          await cloudSync.joinHousehold({ inviteToken, displayName, personRole, deviceName });
+          saveState();
+          updateSyncUi();
+          showToast('✅ 已加入家庭，正在读取三台设备的统一账本');
+        } catch (error) {
+          state.pendingOperations = pendingBeforeJoin;
+          saveState();
+          showToast(`⚠️ ${error.message}`);
+        }
+      });
+      document.getElementById('btn-refresh-cloud').addEventListener('click', async () => {
+        if (!cloudSync) return;
+        try {
+          await cloudSync.flushPending();
+          await cloudSync.refresh();
+          showToast('✅ 已检查云端，当前是最新数据');
+        } catch (error) {
+          showToast(`⚠️ ${error.message}`);
+        }
+      });
+      document.getElementById('btn-copy-invite').addEventListener('click', async () => {
+        if (!state.inviteToken) return;
+        try {
+          await navigator.clipboard.writeText(state.inviteToken);
+          showToast('邀请码已复制，请私下发给另外两台手机');
+        } catch (error) {
+          document.getElementById('created-invite-token').select();
+          showToast('请长按复制完整邀请码');
         }
       });
 
       // Month selector
       document.getElementById('month-selector').addEventListener('change', (e) => {
         state.currentMonth = e.target.value;
+        state.selectedDay = state.currentMonth === shanghaiToday.month ? shanghaiToday.day : 1;
         saveState();
         renderAll();
       });
@@ -2276,37 +2313,23 @@
 
       // Reset Today
       document.getElementById('btn-reset-today').addEventListener('click', () => {
-        if (state.records[state.currentMonth]) {
-          delete state.records[state.currentMonth][state.selectedDay];
-          saveState();
-          renderAll();
-          showToast(`已清空第 ${state.selectedDay} 天的打卡记录`);
-        }
+        if (!state.records[state.currentMonth]?.[state.selectedDay]) return;
+        if (!window.confirm(`确定清空 ${selectedDateString()} 的全部打卡吗？此操作会同步到所有设备。`)) return;
+        performOperation('clear_day', { day: selectedDateString() });
+        showToast(`已清空 ${selectedDateString()}，所有设备将同步更新`);
       });
 
       // Audit Buttons
       document.getElementById('btn-audit-mao').addEventListener('click', () => {
-        if (!state.audits[state.currentMonth]) state.audits[state.currentMonth] = {};
-        if (!state.audits[state.currentMonth][state.selectedDay]) {
-          state.audits[state.currentMonth][state.selectedDay] = { chunAuditedByMao: false, maoAuditedByChun: false };
-        }
-        const cur = state.audits[state.currentMonth][state.selectedDay];
-        cur.maoAuditedByChun = !cur.maoAuditedByChun;
-        saveState();
-        renderDashboardAndDayStrip();
-        showToast(cur.maoAuditedByChun ? '✍️ 春春已审核签字确认毛毛今日积分！' : '已撤销春春对毛毛的签字审核');
+        const current = Boolean(state.audits[state.currentMonth]?.[state.selectedDay]?.maoAuditedByChun);
+        performOperation('audit_set', { day: selectedDateString(), subject: 'mao', approved: !current });
+        showToast(!current ? '✍️ 春春已审核签字确认毛毛今日积分！' : '已撤销春春对毛毛的签字审核');
       });
 
       document.getElementById('btn-audit-chun').addEventListener('click', () => {
-        if (!state.audits[state.currentMonth]) state.audits[state.currentMonth] = {};
-        if (!state.audits[state.currentMonth][state.selectedDay]) {
-          state.audits[state.currentMonth][state.selectedDay] = { chunAuditedByMao: false, maoAuditedByChun: false };
-        }
-        const cur = state.audits[state.currentMonth][state.selectedDay];
-        cur.chunAuditedByMao = !cur.chunAuditedByMao;
-        saveState();
-        renderDashboardAndDayStrip();
-        showToast(cur.chunAuditedByMao ? '✍️ 毛毛已审核签字确认春春今日积分！' : '已撤销毛毛对春春的签字审核');
+        const current = Boolean(state.audits[state.currentMonth]?.[state.selectedDay]?.chunAuditedByMao);
+        performOperation('audit_set', { day: selectedDateString(), subject: 'chun', approved: !current });
+        showToast(!current ? '✍️ 毛毛已审核签字确认春春今日积分！' : '已撤销毛毛对春春的签字审核');
       });
 
       // Matrix Category Filter
@@ -2350,12 +2373,12 @@
           return;
         }
         const cat = document.getElementById('custom-task-cat').value;
-        const pts = Math.max(1, Number(document.getElementById('custom-task-pts').value || 5));
+        const pts = Math.max(1, Math.min(100, Math.trunc(Number(document.getElementById('custom-task-pts').value) || 5)));
         const mode = document.getElementById('custom-task-mode').value;
         const counterTypeVal = document.getElementById('custom-task-Counter').value;
 
         const newTask = {
-          id: 'custom_' + Date.now(),
+          id: 'custom_' + crypto.randomUUID(),
           cat,
           name,
           pts,
@@ -2369,17 +2392,22 @@
           days: [0,1,2,3,4,5,6]
         };
 
-        state.customTasks.push(newTask);
+        performOperation('custom_task_upsert', { task_id: newTask.id, definition: newTask });
         document.getElementById('custom-task-name').value = '';
-        saveState();
         closeModal();
-        renderAll();
         showToast(`✅ 已新增自定义项目「${name}」`);
       });
 
       // Backup & Demo Data Controls
       document.getElementById('btn-load-demo').addEventListener('click', () => {
+        if (!window.confirm('加载演示数据会替换当前账本并同步到所有设备。确定继续吗？')) return;
+        performOperation('reset_all', {}, { render: false });
         seedInitialDemoData();
+        const demoSnapshot = {
+          records: state.records, audits: state.audits,
+          redemptions: state.redemptions, customTasks: state.customTasks
+        };
+        queueOperationsWithoutApplying(snapshotToCloudOperations(demoSnapshot));
         saveState();
         renderAll();
         showToast('✨ 已加载多日演示数据，可切换18日、19日、20日查看');
@@ -2411,10 +2439,33 @@
         }
         try {
           const parsed = JSON.parse(raw);
-          if (parsed.records) state.records = parsed.records;
-          if (parsed.audits) state.audits = parsed.audits;
-          if (parsed.redemptions) state.redemptions = parsed.redemptions;
-          if (parsed.customTasks) state.customTasks = parsed.customTasks;
+          if (!parsed || typeof parsed !== 'object') throw new Error('INVALID_BACKUP');
+          if (!window.confirm('导入会替换当前账本，并同步到所有已连接设备。确定继续吗？')) return;
+          performOperation('reset_all', {}, { render: false });
+          state.records = parsed.records && typeof parsed.records === 'object' ? parsed.records : {};
+          state.audits = parsed.audits && typeof parsed.audits === 'object' ? parsed.audits : {};
+          state.redemptions = Array.isArray(parsed.redemptions) ? parsed.redemptions.map((item) => ({
+            id: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.id || '')
+              ? item.id
+              : crypto.randomUUID(),
+            dateStr: String(item.dateStr || '').slice(0, 10),
+            who: item.who === 'chun' ? 'chun' : 'mao',
+            itemName: String(item.itemName || '未命名兑换').trim().slice(0, 100) || '未命名兑换',
+            pts: Math.max(1, Math.min(100000, Math.trunc(Number(item.pts) || 1)))
+          })) : [];
+          state.customTasks = Array.isArray(parsed.customTasks) ? parsed.customTasks
+            .filter((task) => task && typeof task === 'object' && task.name)
+            .map((task) => ({
+              ...task,
+              id: /^[a-zA-Z0-9_-]{1,100}$/.test(task.id || '') ? task.id : `custom_${crypto.randomUUID()}`,
+              name: String(task.name).slice(0, 80),
+              pts: Math.max(1, Math.min(100, Math.trunc(Number(task.pts) || 1)))
+            })) : [];
+          const importedSnapshot = {
+            records: state.records, audits: state.audits,
+            redemptions: state.redemptions, customTasks: state.customTasks
+          };
+          queueOperationsWithoutApplying(snapshotToCloudOperations(importedSnapshot));
           saveState();
           renderAll();
           showToast('📥 账本数据导入恢复成功！');
@@ -2424,21 +2475,45 @@
       });
 
       document.getElementById('btn-clear-all').addEventListener('click', () => {
-        state.records = {};
-        state.audits = {};
-        state.redemptions = [];
-        state.customTasks = [];
-        saveState();
-        renderAll();
+        if (!window.confirm('确定重置全部账本吗？这会清除所有月份的打卡、审核、兑换和自定义项目，并同步到所有设备。')) return;
+        performOperation('reset_all', {});
         showToast('🗑️ 已重置全部账本数据');
       });
     }
 
     // Initialize Application
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       loadState();
       initEvents();
       renderAll();
+      syncRuntime.configured = Boolean(window.MAOCHUN_CONFIG?.supabaseUrl && window.MAOCHUN_CONFIG?.supabaseAnonKey);
+      updateSyncUi();
+
+      cloudSync = new window.MaoChunSync({
+        getDeviceId: () => state.deviceId,
+        getPendingOperations: () => state.pendingOperations,
+        onOperationAck: acknowledgeOperation,
+        onOperationRejected: rejectOperation,
+        onSnapshot: applyCloudSnapshot,
+        onStatus: ({ status, message, detail }) => {
+          syncRuntime.status = status;
+          syncRuntime.message = message;
+          syncRuntime.detail = detail || '';
+          updateSyncUi();
+        },
+        onFamily: (family) => {
+          syncRuntime.family = family;
+          if (family?.personRole) state.deviceRole = family.personRole;
+          saveState();
+          updateSyncUi();
+        }
+      });
+      await cloudSync.init();
+
+      if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      }
+      if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
     });
   </script>
 </body>
