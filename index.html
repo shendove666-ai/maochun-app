@@ -742,7 +742,7 @@
   <script src="config.js?v=20261107"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="sync-core.js"></script>
-  <script src="app-sync.js?v=20261109b"></script>
+  <script src="app-sync.js?v=20261109c"></script>
   <script>
     // =========================================================================
     // 1. COMPLETE TASK CATALOG FROM 《毛春家庭新政10.18.md》 (All 75 Tasks)
@@ -2165,6 +2165,11 @@
       document.getElementById('header-sync-status').addEventListener('click', () => switchView('sync'));
       document.getElementById('btn-create-family').addEventListener('click', async () => {
         if (!cloudSync) return;
+        if (!cloudSync.client) await cloudSync.init();
+        if (!cloudSync.client) {
+          showToast('⚠️ 云同步组件尚未就绪，请检查网络后重试');
+          return;
+        }
         const familyName = document.getElementById('create-family-name').value.trim();
         const displayName = document.getElementById('create-display-name').value.trim();
         const personRole = document.getElementById('create-person-role').value;
@@ -2193,6 +2198,11 @@
       });
       document.getElementById('btn-join-family').addEventListener('click', async () => {
         if (!cloudSync) return;
+        if (!cloudSync.client) await cloudSync.init();
+        if (!cloudSync.client) {
+          showToast('⚠️ 云同步组件尚未就绪，请检查网络后重试');
+          return;
+        }
         const inviteToken = document.getElementById('join-invite-token').value.trim();
         const displayName = document.getElementById('join-display-name').value.trim();
         const personRole = document.getElementById('join-person-role').value;
