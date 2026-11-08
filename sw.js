@@ -1,4 +1,4 @@
-const CACHE_NAME = 'maochun-v4';
+const CACHE_NAME = 'maochun-v5';
 const LOCAL_ASSETS = [
   './',
   './index.html',
