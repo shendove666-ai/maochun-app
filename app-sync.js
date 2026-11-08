@@ -82,25 +82,7 @@
           }
         );
 
-        let sessionResult = await this.client.auth.getSession();
-        if (sessionResult.error) throw sessionResult.error;
-        if (!sessionResult.data.session) {
-          const signInResult = await this.client.auth.signInAnonymously();
-          if (signInResult.error) throw signInResult.error;
-          const anonymousSession = signInResult.data && signInResult.data.session;
-          if (!anonymousSession) throw new Error('匿名登录未返回有效会话');
-
-          // iOS Safari may delay its storage update after an anonymous sign-in.
-          // Set the newly issued session explicitly so the first RPC request
-          // (creating or joining a household) always carries the user JWT.
-          const restoreResult = await this.client.auth.setSession({
-            access_token: anonymousSession.access_token,
-            refresh_token: anonymousSession.refresh_token
-          });
-          if (restoreResult.error) throw restoreResult.error;
-          sessionResult = await this.client.auth.getSession();
-          if (!sessionResult.data.session) throw new Error('匿名登录会话未能保存');
-        }
+        await this.ensureAuthenticated();
 
         await this.loadCurrentFamily();
         if (!this.family) {
@@ -135,9 +117,34 @@
       return this.family;
     }
 
+    async ensureAuthenticated() {
+      if (!this.client) throw new Error('云同步尚未初始化');
+      let sessionResult = await this.client.auth.getSession();
+      if (sessionResult.error) throw sessionResult.error;
+      if (sessionResult.data.session) return sessionResult.data.session;
+
+      const signInResult = await this.client.auth.signInAnonymously();
+      if (signInResult.error) throw signInResult.error;
+      const anonymousSession = signInResult.data && signInResult.data.session;
+      if (!anonymousSession) throw new Error('匿名登录未返回有效会话');
+
+      // iOS Safari may delay its storage update after an anonymous sign-in.
+      // Set the newly issued session explicitly so the first RPC request
+      // always carries the user JWT.
+      const restoreResult = await this.client.auth.setSession({
+        access_token: anonymousSession.access_token,
+        refresh_token: anonymousSession.refresh_token
+      });
+      if (restoreResult.error) throw restoreResult.error;
+      sessionResult = await this.client.auth.getSession();
+      if (!sessionResult.data.session) throw new Error('匿名登录会话未能保存');
+      return sessionResult.data.session;
+    }
+
     async createHousehold({ familyName, displayName, personRole, deviceName }) {
       if (!this.client) throw new Error('云同步尚未初始化');
       this.setStatus('connecting', '正在创建家庭账本…');
+      await this.ensureAuthenticated();
       const result = await this.client.rpc('create_household', {
         p_name: familyName,
         p_display_name: displayName,
@@ -154,6 +161,7 @@
     async joinHousehold({ inviteToken, displayName, personRole, deviceName }) {
       if (!this.client) throw new Error('云同步尚未初始化');
       this.setStatus('connecting', '正在加入家庭账本…');
+      await this.ensureAuthenticated();
       const result = await this.client.rpc('join_household', {
         p_invite_token: inviteToken,
         p_display_name: displayName,
