@@ -87,7 +87,19 @@
         if (!sessionResult.data.session) {
           const signInResult = await this.client.auth.signInAnonymously();
           if (signInResult.error) throw signInResult.error;
+          const anonymousSession = signInResult.data && signInResult.data.session;
+          if (!anonymousSession) throw new Error('匿名登录未返回有效会话');
+
+          // iOS Safari may delay its storage update after an anonymous sign-in.
+          // Set the newly issued session explicitly so the first RPC request
+          // (creating or joining a household) always carries the user JWT.
+          const restoreResult = await this.client.auth.setSession({
+            access_token: anonymousSession.access_token,
+            refresh_token: anonymousSession.refresh_token
+          });
+          if (restoreResult.error) throw restoreResult.error;
           sessionResult = await this.client.auth.getSession();
+          if (!sessionResult.data.session) throw new Error('匿名登录会话未能保存');
         }
 
         await this.loadCurrentFamily();
@@ -287,3 +299,4 @@
 
   root.MaoChunSync = MaoChunSync;
 })(window);
+
