@@ -166,7 +166,11 @@ begin
     raise exception 'ALREADY_IN_HOUSEHOLD';
   end if;
 
-  v_token := encode(gen_random_bytes(18), 'hex');
+  -- gen_random_bytes is installed under the extensions schema on some
+  -- Supabase projects. PostgreSQL's built-in UUID generator avoids that
+  -- schema dependency while preserving the existing 36-character invite format.
+  v_token := replace(gen_random_uuid()::text, '-', '')
+    || substr(replace(gen_random_uuid()::text, '-', ''), 1, 4);
   insert into public.households(name, invite_hash, created_by)
   values (trim(p_name), digest(v_token, 'sha256'), v_uid)
   returning id into v_id;
@@ -554,3 +558,4 @@ begin
   alter publication supabase_realtime add table public.custom_tasks;
 exception when duplicate_object then null;
 end $$;
+
