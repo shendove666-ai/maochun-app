@@ -172,7 +172,7 @@ begin
   v_token := replace(gen_random_uuid()::text, '-', '')
     || substr(replace(gen_random_uuid()::text, '-', ''), 1, 4);
   insert into public.households(name, invite_hash, created_by)
-  values (trim(p_name), digest(v_token, 'sha256'), v_uid)
+  values (trim(p_name), extensions.digest(v_token, 'sha256'), v_uid)
   returning id into v_id;
 
   insert into public.household_members(
